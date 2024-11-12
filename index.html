@@ -1,0 +1,62 @@
+<html>
+
+<head>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+</head>
+
+</html>
+
+<body>
+    <h1>INFO 1300 Project 2</h1>
+    <p><strong>Group member:</strong> Xinyi Zhou(xz255)</p>
+
+    <!-- Create a svg for China map -->
+    <svg id="china" width="600" height="600"></svg>
+    <script>
+        const chinaMap = d3.select("#china");
+        const width = chinaMap.attr("width");
+        const height = chinaMap.attr("height");
+        const margins = { top: 10, right: 10, bottom: 50, left: 50 };
+        const chinaMapWidth = width - margins.left - margins.right;
+        const chinaMapHeight = height - margins.top - margins.bottom;
+
+        let chinaMapArea = chinaMap.append("g")
+            .attr("transform", `translate(${margins.left},${margins.top})`);
+
+        const requestData = async () => {
+
+            // Load topo json file of China
+            const china = await d3.json("dataset/topochina.json");
+            console.log(china);
+            var region = topojson.feature(china, china.objects["regions.geo"]);
+            console.log(region);
+
+            //create projection for the map
+            var projection = d3.geoMercator().fitSize([chinaMapWidth, chinaMapHeight], region);
+            var path = d3.geoPath().projection(projection);
+            console.log(path)
+
+            chinaMapArea.selectAll("path.region").data(region.features)
+                .join("path")
+                .attr("class", "region")
+                .attr("d", path)
+                .style("fill", "lightgrey")
+                .on("mouseover", function (event, d) {
+                    d3.select(this).style("fill", "red");
+                    chinaMapArea.append("text")
+                        .attr("x", chinaMapWidth/2)
+                        .attr("y", chinaMapHeight/2)
+                        .attr("class", "regionText")
+                        .attr("color", "black")
+                        .text("Region " + d.index);
+                })
+                .on("mouseout", function () {
+                    d3.select(this).style("fill", "lightgrey");
+                    chinaMapArea.selectAll(".regionText").remove();
+                });
+        }
+        requestData();
+
+    </script>
+</body>
