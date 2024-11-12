@@ -29,8 +29,18 @@
             // Load topo json file of China
             const china = await d3.json("dataset/topochina.json");
             console.log(china);
+            const regionList=["安徽Anhui","北京Beijing","福建Fujian","甘肃Gansu","广东Guangdong","广西Guangxi",
+            "贵州Guizhou","海南Hainan","河北Hebei","黑龙江Heilongjiang", "河南Henan", "香港Xianggang","湖北Hubei", 
+            "湖南Hunan", "江苏Jiangsu", "江西Jiangxi", "吉林Jilin", "辽宁Liaoning", "澳门Aomen", "内蒙古Neimenggu", 
+            "宁夏Ningxia","青海Qinghai", "陕西Shaanxi","山东Shandong", "上海Shanghai", "山西Shanxi", "台湾Taiwan", "天津Tianjin", 
+            "新疆Xinjiang", "西藏Xizang", "云南Yunnan","浙江Zhejiang","重庆Chongqing","四川Sichuan"]
             var region = topojson.feature(china, china.objects["regions.geo"]);
             console.log(region);
+            
+
+            region.features.forEach((feature, i) => {
+                feature.index = i;
+            });
 
             //create projection for the map
             var projection = d3.geoMercator().fitSize([chinaMapWidth, chinaMapHeight], region);
@@ -45,11 +55,11 @@
                 .on("mouseover", function (event, d) {
                     d3.select(this).style("fill", "red");
                     chinaMapArea.append("text")
-                        .attr("x", chinaMapWidth/2)
-                        .attr("y", chinaMapHeight/2)
+                        .attr("x", chinaMapWidth / 2)
+                        .attr("y", chinaMapHeight / 2)
                         .attr("class", "regionText")
                         .attr("color", "black")
-                        .text("Region " + d.index);
+                        .text(regionList[d.index]);
                 })
                 .on("mouseout", function () {
                     d3.select(this).style("fill", "lightgrey");
