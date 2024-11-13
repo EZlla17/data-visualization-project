@@ -5,19 +5,42 @@
     <script src="https://d3js.org/topojson.v3.min.js"></script>
 </head>
 
+<style>
+    body {
+        background-color: #7e1d12;
+    }
+
+    h1 {
+        color: #DAC09C;
+    }
+
+    .outline {
+            fill: none;
+            stroke: #DAC09C;
+            stroke-width: 1px;
+        }
+</style>
+
 </html>
 
 <body>
-    <h1>INFO 1300 Project 2</h1>
-    <p><strong>Group member:</strong> Xinyi Zhou(xz255)</p>
+    <h1>INFO 3300 Project 2</h1>
+    <p style="color:#DAC09C"><strong>Group member:</strong> Xinyi Zhou(xz255)</p>
 
     <!-- Create a svg for China map -->
-    <svg id="china" width="600" height="600"></svg>
+    <div style="display: flex; flex-direction: row;">
+        <svg id="china" width="700" height="700" style="margin-left:50px;"></svg>
+        <div>
+            <div id="yearLine" style="height:2; background-color:#F4F8F1;"></div>
+            <div id="yearBar"></div>
+        </div>
+        <div id="topicButtons"></div>
+    </div>
     <script>
         const chinaMap = d3.select("#china");
         const width = chinaMap.attr("width");
         const height = chinaMap.attr("height");
-        const margins = { top: 10, right: 10, bottom: 50, left: 50 };
+        const margins = { top: 50, right: 10, bottom: 10, left: 10 };
         const chinaMapWidth = width - margins.left - margins.right;
         const chinaMapHeight = height - margins.top - margins.bottom;
 
@@ -29,14 +52,45 @@
             // Load topo json file of China
             const china = await d3.json("dataset/topochina.json");
             console.log(china);
-            const regionList=["安徽Anhui","北京Beijing","福建Fujian","甘肃Gansu","广东Guangdong","广西Guangxi",
-            "贵州Guizhou","海南Hainan","河北Hebei","黑龙江Heilongjiang", "河南Henan", "香港Xianggang","湖北Hubei", 
-            "湖南Hunan", "江苏Jiangsu", "江西Jiangxi", "吉林Jilin", "辽宁Liaoning", "澳门Aomen", "内蒙古Neimenggu", 
-            "宁夏Ningxia","青海Qinghai", "陕西Shaanxi","山东Shandong", "上海Shanghai", "山西Shanxi", "台湾Taiwan", "天津Tianjin", 
-            "新疆Xinjiang", "西藏Xizang", "云南Yunnan","浙江Zhejiang","重庆Chongqing","四川Sichuan"]
+            const regionList = ["Anhui", "Beijing", "Fujian", "Gansu", "Guangdong", "Guangxi",
+                "Guizhou", "Hainan", "Hebei", "Heilongjiang", "Henan", "HongKong", "Hubei",
+                "Hunan", "Jiangsu", "Jiangxi", "Jilin", "Liaoning", "Macao", "Inner Mongolia",
+                "Ningxia", "Qinghai", "Shaanxi", "Shandong", "Shanghai", "Shanxi", "Taiwan", "Tianjin",
+                "Xinjiang", "Tibet", "Yunnan", "Zhejiang", "Chongqing", "Sichuan"]
             var region = topojson.feature(china, china.objects["regions.geo"]);
+            var regionMesh = topojson.mesh(china, china.objects["regions.geo"]);
             console.log(region);
-            
+
+            //Create a year list
+            const yearList = ["2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"]
+            //Create a topic list
+            const topicList = ["population", "GRP"]
+
+            //Load population file
+            var population = await d3.csv("dataset/population.csv");
+            //Change the year data from string to int
+            population.forEach(d => {
+                for (const key in d) {
+                    if (!isNaN(key)) {
+                        d[key] = parseInt(d[key], 10);
+                    }
+                }
+            });
+
+            //Load the GRP file
+            var grp = await d3.csv("dataset/GRP.csv");
+            //Change the GRP data from string to int
+            grp.forEach(d => {
+                for (const key in d) {
+                    if (!isNaN(key)) {
+                        d[key] = parseInt(d[key], 10);
+                    }
+                }
+            });
+
+            console.log(population);
+            console.log(grp);
+
 
             region.features.forEach((feature, i) => {
                 feature.index = i;
@@ -46,6 +100,7 @@
             var projection = d3.geoMercator().fitSize([chinaMapWidth, chinaMapHeight], region);
             var path = d3.geoPath().projection(projection);
             console.log(path)
+
 
             chinaMapArea.selectAll("path.region").data(region.features)
                 .join("path")
@@ -65,6 +120,85 @@
                     d3.select(this).style("fill", "lightgrey");
                     chinaMapArea.selectAll(".regionText").remove();
                 });
+
+            let selectedYear = "2020";
+            let selectedTopic = "GRP";
+
+            function updateMapColors() {
+                var data;
+                if (selectedTopic === "population") {
+                    data = population;
+                } else if (selectedTopic === "GRP") {
+                    data = grp;
+                }
+
+                let allData = [];
+                data.forEach(element => {
+                    for (const key in element) {
+                        if (yearList.includes(key)) {
+                            allData.push(element[key]);
+                        }
+                    }
+                });
+
+
+
+                const extent = d3.extent(allData);
+                console.log(extent);
+
+                const colorScale = d3.scaleQuantile()
+                    .domain(extent)
+                    .range(["#bd0026", "#f03b20", "#fd8d3c", "#feb24c", "#fed976","#ffffb2"]);
+
+                chinaMapArea.selectAll("path.topicPath")
+                    .data(region.features)
+                    .join("path")
+                    .attr("class", "topicPath")
+                    .attr("d", path)
+                    .style("fill", d => {
+                        const regionData = data.find(element => element["Region"] === regionList[d.index]);
+                        if (regionData != undefined) {
+                            console.log(regionData[selectedYear]);
+                            return colorScale(regionData[selectedYear])
+                        }
+
+                    });
+            }
+
+            function topicAnimated(topicKey) {
+                selectedTopic = topicKey;
+                updateMapColors();
+            }
+
+            function yearBarsAnimated(yearKey) {
+                selectedYear = yearKey;
+                updateMapColors();
+
+            }
+
+            yearList.forEach(d => {
+                d3.select("#yearBar")
+                    .append("button")
+                    .text(d)
+                    .on("click", function () {
+                        yearBarsAnimated(d);
+                    })
+            });
+
+            topicList.forEach(d => {
+                d3.select("#topicButtons")
+                    .append("button")
+                    .text(d)
+                    .on("click", function () {
+                        topicAnimated(d);
+                    })
+            })
+
+            updateMapColors();
+
+            chinaMapArea.append("path").datum(regionMesh)
+                .attr("class", "outline")
+                .attr("d", path);
         }
         requestData();
 
