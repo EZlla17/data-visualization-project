@@ -102,10 +102,10 @@
         font-size: 12px;
     }
 
-    .regionTitle{
+    .regionTitle {
         font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
         color: black;
-        font-size: 16px;
+        font-size: 20px;
         font-weight: bold;
     }
 </style>
@@ -287,6 +287,7 @@
                         const regionData = data.find(element => element["Region"] === regionList[d.index]);
                         if (regionData != undefined) {
                             console.log(regionData[selectedYear]);
+                            d.regionData = regionData[selectedYear];
                             return colorScale(regionData[selectedYear])
                         }
 
@@ -314,6 +315,10 @@
                         d3.select(".regionInfo").append("span")
                             .attr("class", "regionText")
                             .text(regionList[d.index]);
+
+                        d3.select(".regionInfo").append("span")
+                            .attr("class", "regionText")
+                            .text(d.regionData);
 
 
                         // chinaMapArea.append("text")
