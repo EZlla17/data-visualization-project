@@ -210,13 +210,13 @@
                 .on("mouseover", function (event, d) {
                     const originalColor = d3.select(this).style("fill");
                     d3.select(this).attr("data-original-color", originalColor);
-                    d3.select(this).style("fill", "red");
-                    chinaMapArea.append("text")
-                        .attr("x", chinaMapWidth / 2)
-                        .attr("y", chinaMapHeight / 2)
-                        .attr("class", "regionText")
-                        .attr("color", "black")
-                        .text(regionList[d.index]);
+                    d3.select(this).style("fill", "#F4F8F1");
+                    // chinaMapArea.append("text")
+                    //     .attr("x", chinaMapWidth / 2)
+                    //     .attr("y", chinaMapHeight / 2)
+                    //     .attr("class", "regionText")
+                    //     .attr("color", "black")
+                    //     .text(regionList[d.index]);
                 })
                 .on("mouseout", function (event, d) {
                     const originalColor = d3.select(this).attr("data-original-color");
