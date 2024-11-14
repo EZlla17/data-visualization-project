@@ -115,7 +115,8 @@
 </html>
 
 <body>
-    <h1 style="display: flex; align-items: center; justify-content: center; font-size: 50px;">China’s Economic Pulse Over The Years</h1>
+    <h1 style="display: flex; align-items: center; justify-content: center; font-size: 50px;">China’s Economic Pulse
+        Over The Years</h1>
     <p style="color:#50150A; display: flex; align-items: center; justify-content: center;"><strong>Group
             member:</strong> Xinyi Zhou(xz255) |</p>
 
@@ -320,8 +321,8 @@
 
                         d3.select(".regionInfo").append("span")
                             .attr("class", "regionText")
-                            .style("font-weight","bold")
-                            .style("margin-top",5)
+                            .style("font-weight", "bold")
+                            .style("margin-top", 5)
                             .text(`${selectedTopic + ": "}`);
 
                         d3.select(".regionInfo").append("span")
@@ -369,6 +370,7 @@
                     .append("button")
                     .text(d)
                     .attr("class", "yearButton")
+                    .attr("id", `${"yearButton" + d}`)
                     .on("click", function () {
                         if (lastClickedYearButton != null) {
                             d3.select(lastClickedYearButton).classed("clicked", false);
@@ -377,7 +379,12 @@
                         lastClickedYearButton = this;
                         yearBarsAnimated(d);
                     });
+                if (d === "2020") {
+                    d3.select("#yearButton2020").classed("clicked", true);
+                    lastClickedYearButton = d3.select("#yearButton2020").node();
+                }
             });
+
 
             let lastClickedTopicButton = null;
 
@@ -385,6 +392,7 @@
                 d3.select("#topicButtons")
                     .append("button")
                     .attr("class", "topicButton")
+                    .attr("id", `${"topicButton" + d}`)
                     .text(d)
                     .on("click", function () {
                         if (lastClickedTopicButton != null) {
@@ -394,6 +402,10 @@
                         lastClickedTopicButton = this;
                         topicAnimated(d);
                     });
+                if (d === "GRP") {
+                    d3.select("#topicButtonGRP").classed("clicked", true);
+                    lastClickedTopicButton = d3.select("#topicButtonGRP").node();
+                }
 
             })
 
