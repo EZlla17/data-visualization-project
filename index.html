@@ -22,14 +22,22 @@
         stroke-width: 1px;
     }
 
+    #topicButtons {
+    display: grid;
+    grid-template-columns: repeat(2, 250px);
+    grid-auto-rows: 60px;
+    
+}
+
     .topicButton {
-        margin-bottom: 15px;
-        width: 20%;
+        margin-bottom: 20px;
+        width: 80%;
         border: none;
         background: #DC6142;
         color: #F4F8F1;
         position: relative;
-        padding: 0.6em;
+        padding: 0.7em;
+        font-size:12px;
         font-weight: bold;
         transition: 0.1s;
         border-radius: 5px;
@@ -87,15 +95,18 @@
     <div style="display: flex; flex-direction: row;">
         <svg id="china" width="700" height="700" style="margin-left:30px;"></svg>
         <div style="display: flex; flex-direction: column; margin-left: 50px;">
+            <p style="color:#8A1D12; margin-bottom: 5px; font-weight: bold; margin-top:40px; margin-bottom: 10px;
+                   font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', 
+                   Geneva, Verdana, sans-serif;">Choose the year:</p>
             <div>
-                <div id="yearLine" style="height:2; background-color:#8A1D12; margin-top: 80px; width:550;"></div>
+                <div id="yearLine" style="height:2; background-color:#8A1D12; margin-top: 10px; width:550;"></div>
                 <svg id="yearAxis" height="6" width="550"></svg>
                 <div id="yearBar" style="display: flex; flex-direction: row; gap:10px"></div>
             </div>
             <p style="color:#8A1D12; margin-bottom: 5px; font-weight: bold; margin-top:30px; margin-bottom: 10px;
                    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', 
-                   Geneva, Verdana, sans-serif;">Data Topics</p>
-            <div id="topicButtons" style="display: flex; flex-direction: column;"></div>
+                   Geneva, Verdana, sans-serif;">Choose the data topic:</p>
+            <div id="topicButtons"></div>
         </div>
     </div>
     <script>
@@ -126,7 +137,7 @@
             //Create a year list
             const yearList = ["2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"]
             //Create a topic list
-            const topicList = ["population", "GRP"]
+            const topicList = ["GRP","Population","Disposable Income","Consumption Expenditure","Local Government Revenue"]
 
             //Load population file
             var population = await d3.csv("dataset/population.csv");
@@ -143,6 +154,38 @@
             var grp = await d3.csv("dataset/GRP.csv");
             //Change the GRP data from string to int
             grp.forEach(d => {
+                for (const key in d) {
+                    if (!isNaN(key)) {
+                        d[key] = parseInt(d[key], 10);
+                    }
+                }
+            });
+
+            //load the disposable income file
+            var disposableIncome = await d3.csv("dataset/disposable-income.csv")
+            //change the disposable income data from string to int
+            disposableIncome.forEach(d => {
+                for (const key in d) {
+                    if (!isNaN(key)) {
+                        d[key] = parseInt(d[key], 10);
+                    }
+                }
+            });
+
+            //load the consumption expenditure file
+            var consumptionExpenditure = await d3.csv("dataset/consumption-expenditure.csv")
+            consumptionExpenditure.forEach(d => {
+                for (const key in d) {
+                    if (!isNaN(key)) {
+                        d[key] = parseInt(d[key], 10);
+                    }
+                }
+            });
+
+            //load import-export-value file
+            var localGovernRevenue = await d3.csv("dataset/local-government-revenue.csv")
+            //change the import export value from string to int
+            localGovernRevenue.forEach(d => {
                 for (const key in d) {
                     if (!isNaN(key)) {
                         d[key] = parseInt(d[key], 10);
@@ -170,10 +213,16 @@
 
             function updateMapColors() {
                 var data;
-                if (selectedTopic === "population") {
+                if (selectedTopic === "Population") {
                     data = population;
                 } else if (selectedTopic === "GRP") {
                     data = grp;
+                } else if (selectedTopic ==="Disposable Income"){
+                    data=disposableIncome;
+                } else if (selectedTopic ==="Consumption Expenditure"){
+                    data=consumptionExpenditure;
+                } else if (selectedTopic ==="Local Government Revenue"){
+                    data=localGovernRevenue;
                 }
 
                 let allData = [];
@@ -278,6 +327,7 @@
                                   .domain([0,yearList.length-1])
                                   .range([yearLineWidth/yearList.length/2-10,yearLineWidth-yearLineWidth/yearList.length/2+10])
             const yearAxis= d3.select("#yearAxis");
+            //add axis lines to the yearAxis
             yearAxis.selectAll("line").data(yearList)
               .join("line")
               .attr("x1",(d,i)=>yearLineScale(i))
