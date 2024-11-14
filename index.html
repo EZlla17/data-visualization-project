@@ -88,8 +88,8 @@
         <svg id="china" width="700" height="700" style="margin-left:30px;"></svg>
         <div style="display: flex; flex-direction: column; margin-left: 50px;">
             <div>
-                <div id="yearLine" style="height:2; background-color:#8A1D12; margin-top: 80px; margin-bottom: 10px;">
-                </div>
+                <div id="yearLine" style="height:2; background-color:#8A1D12; margin-top: 80px; width:550;"></div>
+                <svg id="yearAxis" height="6" width="550"></svg>
                 <div id="yearBar" style="display: flex; flex-direction: row; gap:10px"></div>
             </div>
             <p style="color:#8A1D12; margin-bottom: 5px; font-weight: bold; margin-top:30px; margin-bottom: 10px;
@@ -270,13 +270,21 @@
             //find the length of yearLine and buttons
             const yearLineWidth = d3.select("#yearLine").node().offsetWidth;
             console.log(yearLineWidth);
-            let buttonWidth=d3.select("#topicButtons").node().offsetWidth/yearList.length;
-            console.log("ButtonWidth"+buttonWidth);
             //create linearScale for yearLine
             const yearLineScale=d3.scaleLinear()
-                                  .domain([0,yearList.length])
-                                  .range([buttonWidth/2,yearLineWidth-buttonWidth/2])
+                                  .domain([0,yearList.length-1])
+                                  .range([yearLineWidth/yearList.length/2-10,yearLineWidth-yearLineWidth/yearList.length/2+10])
+            const yearAxis= d3.select("#yearAxis");
+            yearAxis.selectAll("line").data(yearList)
+              .join("line")
+              .attr("x1",(d,i)=>yearLineScale(i))
+              .attr("y1",0)
+              .attr("x2",(d,i)=>yearLineScale(i))
+              .attr("y2",6)
+              .style("stroke", "#8A1D12")
+              .style("stroke-width", 2);
 
+            
             updateMapColors();
 
             chinaMapArea.append("path").datum(regionMesh)
