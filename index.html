@@ -23,11 +23,11 @@
     }
 
     #topicButtons {
-    display: grid;
-    grid-template-columns: repeat(2, 250px);
-    grid-auto-rows: 60px;
-    
-}
+        display: grid;
+        grid-template-columns: repeat(2, 250px);
+        grid-auto-rows: 60px;
+
+    }
 
     .topicButton {
         margin-bottom: 20px;
@@ -37,7 +37,7 @@
         color: #F4F8F1;
         position: relative;
         padding: 0.7em;
-        font-size:12px;
+        font-size: 12px;
         font-weight: bold;
         transition: 0.1s;
         border-radius: 5px;
@@ -81,6 +81,15 @@
         border-radius: 5px;
         box-shadow: #c0392b 0px 1px 2px;
         color: #F4F8F1;
+    }
+
+    .regionInfo{
+        background-color: #DAC09C;
+        height:120px;
+        width:120px;
+        border-radius: 100px;
+        box-shadow: #000000e0 0px 3px 5px;
+        opacity:0.8;
     }
 </style>
 
@@ -137,7 +146,7 @@
             //Create a year list
             const yearList = ["2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"]
             //Create a topic list
-            const topicList = ["GRP","Population","Disposable Income","Consumption Expenditure","Local Government Revenue"]
+            const topicList = ["GRP", "Population", "Disposable Income", "Consumption Expenditure", "Local Government Revenue"]
 
             //Load population file
             var population = await d3.csv("dataset/population.csv");
@@ -217,12 +226,12 @@
                     data = population;
                 } else if (selectedTopic === "GRP") {
                     data = grp;
-                } else if (selectedTopic ==="Disposable Income"){
-                    data=disposableIncome;
-                } else if (selectedTopic ==="Consumption Expenditure"){
-                    data=consumptionExpenditure;
-                } else if (selectedTopic ==="Local Government Revenue"){
-                    data=localGovernRevenue;
+                } else if (selectedTopic === "Disposable Income") {
+                    data = disposableIncome;
+                } else if (selectedTopic === "Consumption Expenditure") {
+                    data = consumptionExpenditure;
+                } else if (selectedTopic === "Local Government Revenue") {
+                    data = localGovernRevenue;
                 }
 
                 let allData = [];
@@ -256,22 +265,40 @@
                         }
 
                     })
-                .on("mouseover", function (event, d) {
-                    const originalColor = d3.select(this).style("fill");
-                    d3.select(this).attr("data-original-color", originalColor);
-                    d3.select(this).style("fill", "#F4F8F1");
-                    // chinaMapArea.append("text")
-                    //     .attr("x", chinaMapWidth / 2)
-                    //     .attr("y", chinaMapHeight / 2)
-                    //     .attr("class", "regionText")
-                    //     .attr("color", "black")
-                    //     .text(regionList[d.index]);
-                })
-                .on("mouseout", function (event, d) {
-                    const originalColor = d3.select(this).attr("data-original-color");
-                    d3.select(this).style("fill", originalColor);
-                    chinaMapArea.selectAll(".regionText").remove();
-                });;
+                    .on("mouseover", function (event, d) {
+                        const originalColor = d3.select(this).style("fill");
+                        d3.select(this).attr("data-original-color", originalColor);
+                        d3.select(this).style("fill", "#F4F8F1");
+
+                        const x = event.pageX;
+                        const y = event.pageY;
+                        d3.select("body").append("div")
+                            .attr("class", "regionInfo")
+                            .style("position", "absolute")
+                            .style("top", `${y}px`)
+                            .style("left", `${x}px`)
+
+                        // chinaMapArea.append("text")
+                        //     .attr("x", chinaMapWidth / 2)
+                        //     .attr("y", chinaMapHeight / 2)
+                        //     .attr("class", "regionText")
+                        //     .attr("color", "black")
+                        //     .text(regionList[d.index]);
+                    })
+                    .on("mousemove", function (event, d) {
+                        const x = event.pageX;
+                        const y = event.pageY;
+                        d3.select(".regionInfo")
+                          .style("top",`${y}px`)
+                          .style("left", `${x}px`)
+                    })
+                    .on("mouseout", function (event, d) {
+                        const originalColor = d3.select(this).attr("data-original-color");
+                        d3.select(this).style("fill", originalColor);
+                        chinaMapArea.selectAll(".regionText").remove();
+
+                        d3.select(".regionInfo").remove();
+                    })
             }
 
             function topicAnimated(topicKey) {
@@ -323,21 +350,21 @@
             const yearLineWidth = d3.select("#yearLine").node().offsetWidth;
             console.log(yearLineWidth);
             //create linearScale for yearLine
-            const yearLineScale=d3.scaleLinear()
-                                  .domain([0,yearList.length-1])
-                                  .range([yearLineWidth/yearList.length/2-10,yearLineWidth-yearLineWidth/yearList.length/2+10])
-            const yearAxis= d3.select("#yearAxis");
+            const yearLineScale = d3.scaleLinear()
+                .domain([0, yearList.length - 1])
+                .range([yearLineWidth / yearList.length / 2 - 10, yearLineWidth - yearLineWidth / yearList.length / 2 + 10])
+            const yearAxis = d3.select("#yearAxis");
             //add axis lines to the yearAxis
             yearAxis.selectAll("line").data(yearList)
-              .join("line")
-              .attr("x1",(d,i)=>yearLineScale(i))
-              .attr("y1",0)
-              .attr("x2",(d,i)=>yearLineScale(i))
-              .attr("y2",6)
-              .style("stroke", "#8A1D12")
-              .style("stroke-width", 2);
+                .join("line")
+                .attr("x1", (d, i) => yearLineScale(i))
+                .attr("y1", 0)
+                .attr("x2", (d, i) => yearLineScale(i))
+                .attr("y2", 6)
+                .style("stroke", "#8A1D12")
+                .style("stroke-width", 2);
 
-            
+
             updateMapColors();
 
             chinaMapArea.append("path").datum(regionMesh)
