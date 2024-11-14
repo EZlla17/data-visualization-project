@@ -83,13 +83,30 @@
         color: #F4F8F1;
     }
 
-    .regionInfo{
+    .regionInfo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         background-color: #DAC09C;
-        height:120px;
-        width:120px;
+        height: 120px;
+        width: 120px;
         border-radius: 100px;
         box-shadow: #000000e0 0px 3px 5px;
-        opacity:0.8;
+        opacity: 0.8;
+    }
+
+    .regionText {
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        color: black;
+        font-size: 12px;
+    }
+
+    .regionTitle{
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        color: black;
+        font-size: 16px;
+        font-weight: bold;
     }
 </style>
 
@@ -139,6 +156,11 @@
                 "Hunan", "Jiangsu", "Jiangxi", "Jilin", "Liaoning", "Macao", "Inner Mongolia",
                 "Ningxia", "Qinghai", "Shaanxi", "Shandong", "Shanghai", "Shanxi", "Taiwan", "Tianjin",
                 "Xinjiang", "Tibet", "Yunnan", "Zhejiang", "Chongqing", "Sichuan"]
+            const regionListCN = ["安徽", "北京", "福建", "甘肃", "广东", "广西",
+                "贵州", "海南", "河北", "黑龙江", "河南", "香港", "湖北",
+                "湖南", "江苏", "江西", "吉林", "辽宁", "澳门", "内蒙古",
+                "宁夏", "青海", "陕西", "山东", "上海", "山西", "台湾", "天津",
+                "新疆", "西藏", "云南", "浙江", "重庆", "四川"]
             var region = topojson.feature(china, china.objects["regions.geo"]);
             var regionMesh = topojson.mesh(china, china.objects["regions.geo"]);
             console.log(region);
@@ -220,6 +242,7 @@
             let selectedYear = "2020";
             let selectedTopic = "GRP";
 
+            //Update the map in response to the topic button and year button
             function updateMapColors() {
                 var data;
                 if (selectedTopic === "Population") {
@@ -248,10 +271,13 @@
                 const extent = d3.extent(allData);
                 console.log(extent);
 
+                //create a color scale
+                //color scale reference: https://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
                 const colorScale = d3.scaleQuantile()
                     .domain(extent)
                     .range(["#bd0026", "#f03b20", "#fd8d3c", "#feb24c", "#fed976", "#ffffb2"]);
 
+                //add topicPath to the map
                 chinaMapArea.selectAll("path.topicPath")
                     .data(region.features)
                     .join("path")
@@ -270,13 +296,25 @@
                         d3.select(this).attr("data-original-color", originalColor);
                         d3.select(this).style("fill", "#F4F8F1");
 
+                        //How to get cursor position: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/pageX 
                         const x = event.pageX;
                         const y = event.pageY;
                         d3.select("body").append("div")
                             .attr("class", "regionInfo")
                             .style("position", "absolute")
                             .style("top", `${y}px`)
-                            .style("left", `${x}px`)
+                            .style("left", `${x}px`);
+
+
+
+                        d3.select(".regionInfo").append("span")
+                            .attr("class", "regionTitle")
+                            .text(regionListCN[d.index]);
+
+                        d3.select(".regionInfo").append("span")
+                            .attr("class", "regionText")
+                            .text(regionList[d.index]);
+
 
                         // chinaMapArea.append("text")
                         //     .attr("x", chinaMapWidth / 2)
@@ -289,8 +327,8 @@
                         const x = event.pageX;
                         const y = event.pageY;
                         d3.select(".regionInfo")
-                          .style("top",`${y}px`)
-                          .style("left", `${x}px`)
+                            .style("top", `${y}px`)
+                            .style("left", `${x}px`)
                     })
                     .on("mouseout", function (event, d) {
                         const originalColor = d3.select(this).attr("data-original-color");
