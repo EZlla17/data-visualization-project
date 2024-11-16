@@ -111,6 +111,48 @@
         font-weight: bold;
         text-align: center;
     }
+
+    #yearRange {
+        -webkit-appearance: none;
+        appearance: none;
+        background: #8A1D12;
+        height: 4px;
+        border-radius: 10px;
+        cursor: pointer;
+        width: 15rem;
+    }
+
+    #yearRange::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 15px;
+        background: #8A1D12;
+        border: solid 2px #DAC09C;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    #year {
+        -webkit-appearance: none;
+        appearance: none;
+        background: #8A1D12;
+        height: 4px;
+        border-radius: 10px;
+        cursor: pointer;
+        width: 15rem;
+    }
+
+    #year::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 15px;
+        background: #8A1D12;
+        border: solid 2px #DAC09C;
+        border-radius: 10px;
+        cursor: pointer;
+    }
 </style>
 
 </html>
@@ -128,10 +170,19 @@
             <p style="color:#8A1D12; margin-bottom: 5px; font-weight: bold; margin-top:40px; margin-bottom: 10px;
                    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', 
                    Geneva, Verdana, sans-serif;">Choose the year:</p>
-            <div>
-                <div id="yearLine" style="height:2; background-color:#8A1D12; margin-top: 10px; width:550;"></div>
+            <div style="display:flex; flex-direction: column;">
+                <div id="yearRangeBar"
+                    style="display: flex; flex-direction: row; gap:10px; width:550;justify-content:space-between;">
+                </div>
+                <svg id="yearRangeAxis" height="6" width="550" style="margin-top:1;z-index: 99;"></svg>
+                <input type="range" id="yearRange" name="yearRange" min="2004" max="2024" step="10"
+                    style="margin:0; width: 530; margin-left: 10; margin-right: 10; margin-bottom: 20px;" />
+                <input type="range" id="year" name="yearRange" step="1"
+                    style="margin:0; width: 530; margin-left: 10; margin-right: 10;" />
                 <svg id="yearAxis" height="6" width="550"></svg>
-                <div id="yearBar" style="display: flex; flex-direction: row; gap:10px"></div>
+                <div id="yearBar"
+                    style="display: flex; flex-direction: row; gap:10px; width:550; justify-content: space-between;">
+                </div>
             </div>
             <p style="color:#8A1D12; margin-bottom: 5px; font-weight: bold; margin-top:30px; margin-bottom: 10px;
                    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', 
@@ -170,7 +221,11 @@
             console.log(region);
 
             //Create a year list
-            const yearList = ["2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"]
+            const yearList = ["2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011",
+                "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019",
+                "2020", "2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033",]
+            //Create a list of year range
+            const yearRange = ["2004", "2014", "2024"]
             //Create a topic list
             const topicList = ["GRP", "Population", "Disposable Income", "Consumption Expenditure", "Local Government Revenue"]
 
@@ -243,7 +298,7 @@
 
 
             //set default selectedYear and selectedTopic
-            let selectedYear = "2020";
+            let selectedYearRange = "2014";
             let selectedTopic = "GRP";
 
             //Update the map in response to the topic button and year button
@@ -271,7 +326,6 @@
                 });
 
 
-
                 const extent = d3.extent(allData);
                 console.log(extent);
 
@@ -289,10 +343,13 @@
                     .attr("d", path)
                     .style("fill", d => {
                         const regionData = data.find(element => element["Region"] === regionList[d.index]);
-                        if (regionData != undefined) {
+                        if (regionData != undefined && !isNaN(regionData[selectedYear])) {
                             console.log(regionData[selectedYear]);
                             d.regionData = regionData[selectedYear];
                             return colorScale(regionData[selectedYear])
+                        } else {
+                            d.regionData = "Data not yet available";
+                            return "grey"
                         }
 
                     })
@@ -309,7 +366,6 @@
                             .style("position", "absolute")
                             .style("top", `${y}px`)
                             .style("left", `${x}px`);
-
 
 
                         d3.select(".regionInfo").append("span")
@@ -365,25 +421,91 @@
 
             }
 
+
+            let lastClickedYearRangeButton = null;
             let lastClickedYearButton = null;
-            yearList.forEach(d => {
-                d3.select("#yearBar")
+
+            yearRange.forEach(d => {
+                d3.select("#yearRangeBar")
                     .append("button")
                     .text(d)
-                    .attr("class", "yearButton")
-                    .attr("id", `${"yearButton" + d}`)
+                    .attr("class", "yearRangeButton yearButton")
+                    .attr("id", `${"yearRangeButton" + d}`)
                     .on("click", function () {
-                        if (lastClickedYearButton != null) {
-                            d3.select(lastClickedYearButton).classed("clicked", false);
+                        if (lastClickedYearRangeButton != null) {
+                            d3.select(lastClickedYearRangeButton).classed("clicked", false);
                         }
                         d3.select(this).classed("clicked", true);
-                        lastClickedYearButton = this;
-                        yearBarsAnimated(d);
+                        lastClickedYearRangeButton = this;
+                        d3.select("#yearRange").property("value", d);
+                        yearRangeAnimated(d);
                     });
-                if (d === "2020") {
-                    d3.select("#yearButton2020").classed("clicked", true);
-                    lastClickedYearButton = d3.select("#yearButton2020").node();
+                if (d === selectedYearRange) {
+                    d3.select("#yearRangeButton2014").classed("clicked", true);
+                    lastClickedYearRangeButton = d3.select("#yearRangeButton2014").node();
+                    d3.select("#yearRange").property("value", "2014");
+                    yearRangeAnimated(d);
                 }
+            });
+
+            function yearRangeAnimated(yearRangeKey) {
+                d3.select("#yearBar").selectAll(".yearButton").remove();
+                if (yearRangeKey === "2004") {
+                    chosenYearList = yearList.slice(0, 10);
+                    d3.select("#year").attr("min", 2004)
+                        .attr("max", 2013).property("value", "2004")
+                } else if (yearRangeKey === "2014") {
+                    chosenYearList = yearList.slice(10, 20);
+                    d3.select("#year").attr("min", 2014)
+                        .attr("max", 2023).property("value", "2014")
+                } else {
+                    chosenYearList = yearList.slice(20, 30);
+                    d3.select("#year").attr("min", 2024)
+                        .attr("max", 2033).property("value", "2024")
+                }
+
+
+                chosenYearList.forEach(d => {
+                    d3.select("#yearBar")
+                        .append("button")
+                        .text(d)
+                        .attr("class", "yearButton")
+                        .attr("id", `${"yearButton" + d}`)
+                        .on("click", function () {
+                            if (lastClickedYearButton != null) {
+                                d3.select(lastClickedYearButton).classed("clicked", false);
+                            }
+                            d3.select(this).classed("clicked", true);
+                            lastClickedYearButton = this;
+                            d3.select("#year").property("value", d);
+
+                            yearBarsAnimated(d);
+                        });
+
+                    const defaultYear = yearRangeKey === "2004" ? "2004" : yearRangeKey === "2014" ? "2014" : "2024";
+                    d3.select(`#yearButton${defaultYear}`).classed("clicked", true);
+                    lastClickedYearButton = d3.select(`#yearButton${defaultYear}`).node();
+
+                    yearBarsAnimated(defaultYear);
+
+
+                });
+            }
+
+            d3.select("#yearRange").on("input", function () {
+                const selectedYearRange = this.value;
+                d3.select(lastClickedYearRangeButton).classed("clicked", false);
+                lastClickedYearRangeButton = d3.select(`#yearRangeButton${selectedYearRange}`).node();
+                d3.select(lastClickedYearRangeButton).classed("clicked", true);
+                yearRangeAnimated(selectedYearRange);
+            });
+
+            d3.select("#year").on("input", function () {
+                const selectedYear = this.value;
+                d3.select(lastClickedYearButton).classed("clicked", false);
+                lastClickedYearButton = d3.select(`#yearButton${selectedYear}`).node();
+                d3.select(lastClickedYearButton).classed("clicked", true);
+                yearBarsAnimated(selectedYear);
             });
 
 
@@ -410,20 +532,34 @@
 
             })
 
-            //find the length of yearLine and buttons
-            const yearLineWidth = d3.select("#yearLine").node().offsetWidth;
-            console.log(yearLineWidth);
+
+            const buttonWidth = d3.select(".yearButton").node().offsetWidth;
             //create linearScale for yearLine
             const yearLineScale = d3.scaleLinear()
-                .domain([0, yearList.length - 1])
-                .range([yearLineWidth / yearList.length / 2 - 10, yearLineWidth - yearLineWidth / yearList.length / 2 + 10])
+                .domain([0, chosenYearList.length - 1])
+                .range([buttonWidth / 2, 550 - buttonWidth / 2])
             const yearAxis = d3.select("#yearAxis");
+
+            const yearRangeScale = d3.scaleLinear()
+                .domain([0, 2])
+                .range([buttonWidth / 2, 550 - buttonWidth / 2])
+            const yearRangeAxis = d3.select("#yearRangeAxis");
+
             //add axis lines to the yearAxis
-            yearAxis.selectAll("line").data(yearList)
+            yearAxis.selectAll("line").data(chosenYearList)
                 .join("line")
                 .attr("x1", (d, i) => yearLineScale(i))
                 .attr("y1", 0)
                 .attr("x2", (d, i) => yearLineScale(i))
+                .attr("y2", 6)
+                .style("stroke", "#8A1D12")
+                .style("stroke-width", 2);
+
+            yearRangeAxis.selectAll("line").data(yearRange)
+                .join("line")
+                .attr("x1", (d, i) => yearRangeScale(i))
+                .attr("y1", 0)
+                .attr("x2", (d, i) => yearRangeScale(i))
                 .attr("y2", 6)
                 .style("stroke", "#8A1D12")
                 .style("stroke-width", 2);
