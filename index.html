@@ -165,29 +165,37 @@
 
     <!-- Create a svg for China map -->
     <div style="display: flex; flex-direction: row;">
-        <svg id="china" width="700" height="700" style="margin-left:30px;"></svg>
-        <div style="display: flex; flex-direction: column; margin-left: 50px;">
-            <p style="color:#8A1D12; margin-bottom: 5px; font-weight: bold; margin-top:40px; margin-bottom: 10px;
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div style="display: flex; flex-direction: row; align-items: center;">
+                <svg id="china" width="700" height="700" style="margin-left:30px;"></svg>
+
+                <div style="display: flex; flex-direction: column; margin-left: 50px;">
+                    <p style="color:#8A1D12; margin-bottom: 5px; font-weight: bold; margin-top:40px; margin-bottom: 10px;
                    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', 
                    Geneva, Verdana, sans-serif;">Choose the year:</p>
-            <div style="display:flex; flex-direction: column;">
-                <div id="yearRangeBar"
-                    style="display: flex; flex-direction: row; gap:10px; width:550;justify-content:space-between;">
-                </div>
-                <svg id="yearRangeAxis" height="6" width="550" style="margin-top:1;z-index: 99;"></svg>
-                <input type="range" id="yearRange" name="yearRange" min="2004" max="2024" step="10"
-                    style="margin:0; width: 530; margin-left: 10; margin-right: 10; margin-bottom: 20px;" />
-                <input type="range" id="year" name="yearRange" step="1"
-                    style="margin:0; width: 530; margin-left: 10; margin-right: 10;" />
-                <svg id="yearAxis" height="6" width="550"></svg>
-                <div id="yearBar"
-                    style="display: flex; flex-direction: row; gap:10px; width:550; justify-content: space-between;">
-                </div>
-            </div>
-            <p style="color:#8A1D12; margin-bottom: 5px; font-weight: bold; margin-top:30px; margin-bottom: 10px;
+                    <div style="display:flex; flex-direction: column;">
+                        <div id="yearRangeBar"
+                            style="display: flex; flex-direction: row; gap:10px;
+                            width:550;justify-content:space-between;">
+                        </div>
+                        <svg id="yearRangeAxis" height="6" width="550" style="margin-top:1;z-index: 99;"></svg>
+                        <input type="range" id="yearRange" name="yearRange" min="2004" max="2024" step="10"
+                            style="margin:0; width: 530; margin-left: 10; margin-right: 10; margin-bottom: 20px;" />
+                        <input type="range" id="year" name="yearRange" step="1"
+                            style="margin:0; width: 530; margin-left: 10; margin-right: 10;" />
+                        <svg id="yearAxis" height="6" width="550"></svg>
+                        <div id="yearBar"
+                            style="display: flex; flex-direction: row; gap:10px; width:550; justify-content: space-between;">
+                        </div>
+                    </div>
+                    <p style="color:#8A1D12; margin-bottom: 5px; font-weight: bold; margin-top:30px; margin-bottom: 10px;
                    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', 
                    Geneva, Verdana, sans-serif;">Choose the data topic:</p>
-            <div id="topicButtons"></div>
+                    <div id="topicButtons"></div>
+                </div>
+            </div>
+
+            <svg id="barchart" height="500" width="800" style="margin-top:50px"></svg>
         </div>
     </div>
     <script>
@@ -200,6 +208,19 @@
 
         let chinaMapArea = chinaMap.append("g")
             .attr("transform", `translate(${margins.left},${margins.top})`);
+
+
+        const histSvg = d3.select("svg#barchart");
+        const histWidth = histSvg.attr("width");
+        const histHeight = histSvg.attr("height");
+        const histMargin = { top: 10, right: 10, bottom: 50, left: 60 };
+        const histChartWidth = histWidth - histMargin.left - histMargin.right;
+        const histChartHeight = histHeight - histMargin.top - histMargin.bottom;
+
+        let annotations = histSvg.append("g").attr("id", "annotations");
+        let histChartArea = histSvg.append("g").attr("id", "points")
+            .attr("transform", `translate(${histMargin.left},${histMargin.top})`)
+
 
         const requestData = async () => {
 
@@ -335,6 +356,7 @@
                     .domain(extent)
                     .range(["#bd0026", "#f03b20", "#fd8d3c", "#feb24c", "#fed976", "#ffffb2"]);
 
+
                 //add topicPath to the map
                 chinaMapArea.selectAll("path.topicPath")
                     .data(region.features)
@@ -408,6 +430,8 @@
 
                         d3.select(".regionInfo").remove();
                     })
+
+
             }
 
             function topicAnimated(topicKey) {
@@ -510,6 +534,8 @@
 
 
             let lastClickedTopicButton = null;
+            //let selectedProvince = null;
+
 
             topicList.forEach(d => {
                 d3.select("#topicButtons")
@@ -524,6 +550,14 @@
                         d3.select(this).classed("clicked", true);
                         lastClickedTopicButton = this;
                         topicAnimated(d);
+
+                        // 尝试在切换topic的时候换histogram的数据但是失败了:)
+                        //const data = getDataByTopic(selectedTopic);
+                        //const filteredData = data.find(row => row.Region === selectedProvince);
+                        //showHist(filteredData);
+                        //updateLabels(selectedTopic, selectedProvince);
+                        
+
                     });
                 if (d === "GRP") {
                     d3.select("#topicButtonGRP").classed("clicked", true);
@@ -531,6 +565,8 @@
                 }
 
             })
+
+
 
 
             const buttonWidth = d3.select(".yearButton").node().offsetWidth;
@@ -570,6 +606,176 @@
             chinaMapArea.append("path").datum(regionMesh)
                 .attr("class", "outline")
                 .attr("d", path);
+
+
+
+
+            // Zoom in and show histogram starts here
+
+            var zoom = d3.zoom()
+                .scaleExtent([1, 20])
+                .translateExtent([[-50, -50], [chinaMapWidth + 50, chinaMapHeight + 50]])
+                .on("zoom", mapZoomed);
+
+            chinaMapArea.call(zoom);
+
+            chinaMapArea.call(zoom.transform, d3.zoomIdentity);
+
+            function mapZoomed({ transform }) {
+                chinaMapArea.attr("transform", transform.toString());
+                chinaMapArea.select('.outline')
+                    .style('stroke-width', 1 / transform.k);
+
+            }
+
+            chinaMapArea.selectAll('path.topicPath').on("click", clicked)
+
+            function getDataByTopic(topic) {
+                if (topic === "Population") return population;
+                if (topic === "GRP") return grp;
+                if (topic === "Disposable Income") return disposableIncome;
+                if (topic === "Consumption Expenditure") return consumptionExpenditure;
+                if (topic === "Local Government Revenue") return localGovernRevenue;
+            }
+
+            function clicked(event, d) {
+                console.log(d)
+
+                chinaMapArea.selectAll('path.topicPath')
+                        .style('stroke', null)
+                        .style('stroke-width', null)
+                        .style('fill', (d) => d3.select(this).attr("data-original-color"));
+
+                // Apply highlight effect to the clicked region
+                d3.select(this)
+                    .style('stroke', 'white')
+                    .style('stroke-width', 1)
+                    .style('fill', '#FF5733');
+
+
+                let bounds = path.bounds(d);
+                let dx = bounds[1][0] - bounds[0][0];
+                let dy = bounds[1][1] - bounds[0][1];
+                let x = (bounds[0][0] + bounds[1][0]) / 2;
+                let y = (bounds[0][1] + bounds[1][1]) / 2;
+
+                let scale = Math.max(1, Math.min(10, 0.9 / Math.max(dx / chinaMapWidth,
+                    dy / chinaMapHeight)));
+
+                let translate = [chinaMapWidth / 2 - x * scale, chinaMapHeight / 2 - y * scale];
+                let newTransform = d3.zoomIdentity
+                    .translate(translate[0], translate[1])
+                    .scale(scale);
+
+                chinaMapArea.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
+
+                const selectedProvince = regionList[d.index];
+                const data = getDataByTopic(selectedTopic);
+                const filteredData = data.find(row => row.Region === selectedProvince);
+
+                showHist(filteredData);
+                
+                updateLabels(selectedTopic, selectedProvince);
+            
+            }
+
+
+
+            // Append x-axis label
+            histChartArea.append("text")
+            .attr("class", "x-axis-label")
+            .attr("x", histChartWidth / 2)
+            .attr("y", histChartHeight + 40)
+            .style("text-anchor", "middle")
+            .style("font-size", "14px");
+
+            // Append y-axis label
+            histChartArea.append("text")
+            .attr("class", "y-axis-label")
+            .attr("transform", `rotate(-90)`)
+            .attr("x", -histChartHeight / 2)
+            .attr("y", -50)
+            .style("text-anchor", "middle")
+            .style("font-size", "14px");
+
+            function updateLabels(selectedTopic, selectedProvince) {
+                const topicLabels = {
+                    "GRP": "Gross Regional Product (GRP)",
+                    "Population": "Population (millions)",
+                    "Disposable Income": "Disposable Income (Yuan)",
+                    "Consumption Expenditure": "Consumption Expenditure (Yuan)",
+                    "Local Government Revenue": "Local Government Revenue (Yuan)"
+                };
+     
+                // Update x-axis label with selected topic
+                d3.select(".x-axis-label")
+                    .text(`Year`);
+            
+                // Update y-axis label with selected topic
+                d3.select(".y-axis-label")
+                    .text(`${topicLabels[selectedTopic]} of ${selectedProvince}`);
+            
+            }
+
+
+            function showHist(data) {
+                const yearData = Object.keys(data)
+                    .filter(key => !isNaN(key))
+                    .map(year => ({ year: +year, value: data[year] }));
+
+                const x = d3.scaleBand()
+                    .domain(yearData.map(d => d.year))
+                    .range([0, histChartWidth])
+                    .padding(0.1);
+
+                const y = d3.scaleLinear()
+                    .domain([0, d3.max(yearData, d => d.value)])
+                    .range([histChartHeight, 0]);
+
+                histChartArea.selectAll('rect')
+                    .data(yearData)
+                    .join('rect')
+                    .attr('x', d => x(d.year))
+                    .attr('y', d => y(d.value))
+                    .attr('width', x.bandwidth())
+                    .attr('height', d => histChartHeight - y(d.value))
+                    .attr('fill', '#8A1D12');
+
+                const valueScale = d3.scaleLinear().domain([0,1]).range([histChartHeight, 0]);
+                let leftAxis = d3.axisLeft(valueScale).tickFormat(d3.format('.0%'));
+                let leftGridlines = d3.axisLeft(valueScale)
+                                        .tickSize(-histChartWidth-10)
+                                        .tickFormat("")
+                annotations.append("g")
+                            .attr("class", "y axis")
+                            .attr("transform",`translate(${histMargin.left-10},${histMargin.top})`)
+                            .call(leftAxis)
+                annotations.append("g")
+                            .attr("class", "y gridlines")
+                            .attr("transform",`translate(${histMargin.left-10},${histMargin.top})`)
+                            .call(leftGridlines);
+                
+            
+                const xScale = d3.scaleBand()
+                                .domain(d3.range(2004, 2025)) // Years from 2004 to 2024
+                                .range([0, histChartWidth])
+                                .padding(0.05);
+                let bottomAxis = d3.axisBottom(xScale)
+                const xAxis = d3.axisBottom(x)
+                                .tickValues(yearData.map(d => d.year))
+                                .tickFormat(d => d);
+
+                annotations.append("g")
+                            .attr("class", "x axis")
+                            .attr("transform", `translate(${histMargin.left}, ${histHeight - histMargin.bottom})`)
+                            .call(xAxis)
+                            .selectAll("text")
+                            .attr("transform", "rotate(-30)")
+                            .style("text-anchor", "middle");
+        }
+
+
+
         }
         requestData();
 
