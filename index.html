@@ -382,9 +382,8 @@
                     .on("mouseover", function (event, d) {
                         const originalColor = d3.select(this).style("fill");
                         d3.select(this).attr("data-original-color", originalColor);
-                        d3.select(this).style("fill", "#F4F8F1")
-                            .style("stroke", "#50150A")
-                            .style("stroke-width", "2px");;
+                        d3.select(this).style("fill", "#F4F8F1");
+
 
                         //How to get cursor position: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/pageX 
                         const x = event.pageX;
@@ -425,8 +424,7 @@
                     })
                     .on("mouseout", function (event, d) {
                         const originalColor = d3.select(this).attr("data-original-color");
-                        d3.select(this).style("fill", originalColor)
-                            .style("stroke", "none");
+                        d3.select(this).style("fill", originalColor);
                         chinaMapArea.selectAll(".regionText").remove();
 
                         d3.select(".regionInfo").remove();
