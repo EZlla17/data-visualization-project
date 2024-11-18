@@ -89,7 +89,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background-color: #DAC09C;
+        background-color: #DC6142;
         height: 150px;
         width: 150px;
         border-radius: 100px;
@@ -128,7 +128,7 @@
         width: 20px;
         height: 15px;
         background: #8A1D12;
-        border: solid 2px #DAC09C;
+        border: solid 2px #F4F8F1;
         border-radius: 10px;
         cursor: pointer;
     }
@@ -149,7 +149,7 @@
         width: 20px;
         height: 15px;
         background: #8A1D12;
-        border: solid 2px #DAC09C;
+        border: solid 2px #F4F8F1;
         border-radius: 10px;
         cursor: pointer;
     }
@@ -168,14 +168,13 @@
         <div style="display: flex; flex-direction: column; align-items: center;">
             <div style="display: flex; flex-direction: row;">
                 <svg id="china" width="700" height="700" style="margin-left:30px;"></svg>
-                
+
                 <div style="display: flex; flex-direction: column; margin-left: 50px;">
                     <p style="color:#8A1D12; margin-bottom: 5px; font-weight: bold; margin-top:40px; margin-bottom: 10px;
                    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', 
                    Geneva, Verdana, sans-serif;">Choose the year:</p>
                     <div style="display:flex; flex-direction: column;">
-                        <div id="yearRangeBar"
-                            style="display: flex; flex-direction: row; gap:10px;
+                        <div id="yearRangeBar" style="display: flex; flex-direction: row; gap:10px;
                             width:550;justify-content:space-between;">
                         </div>
                         <svg id="yearRangeAxis" height="6" width="550" style="margin-top:1;z-index: 99;"></svg>
@@ -192,10 +191,10 @@
                    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', 
                    Geneva, Verdana, sans-serif;">Choose the data topic:</p>
                     <div id="topicButtons"></div>
-                    <svg id="colorLegend" height="50" width="550" style=" margin-top:30px" ></svg>
+                    <svg id="colorLegend" height="50" width="550" style=" margin-top:30px;"></svg>
                 </div>
             </div>
-            
+
             <svg id="barchart" height="500" width="800" style="margin-top:50px"></svg>
         </div>
     </div>
@@ -356,11 +355,11 @@
                 //color scale reference: https://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
                 const colorScale = d3.scaleQuantile()
                     .domain(extent)
-                    .range(["#ffffb2", "#fed976", "#feb24c", "#fd8d3c", "#f03b20", "#bd0026"]);
+                    .range(["#feedde", "#fdbe85", "#fd8d3c", "#e6550d", "#a63603"]);
 
                 drawLegend("#colorLegend", colorScale);
 
-                
+
 
                 //add topicPath to the map
                 chinaMapArea.selectAll("path.topicPath")
@@ -383,7 +382,9 @@
                     .on("mouseover", function (event, d) {
                         const originalColor = d3.select(this).style("fill");
                         d3.select(this).attr("data-original-color", originalColor);
-                        d3.select(this).style("fill", "#F4F8F1");
+                        d3.select(this).style("fill", "#F4F8F1")
+                            .style("stroke", "#50150A")
+                            .style("stroke-width", "2px");;
 
                         //How to get cursor position: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/pageX 
                         const x = event.pageX;
@@ -414,12 +415,6 @@
                             .text(d.regionData);
 
 
-                        // chinaMapArea.append("text")
-                        //     .attr("x", chinaMapWidth / 2)
-                        //     .attr("y", chinaMapHeight / 2)
-                        //     .attr("class", "regionText")
-                        //     .attr("color", "black")
-                        //     .text(regionList[d.index]);
                     })
                     .on("mousemove", function (event, d) {
                         const x = event.pageX;
@@ -430,7 +425,8 @@
                     })
                     .on("mouseout", function (event, d) {
                         const originalColor = d3.select(this).attr("data-original-color");
-                        d3.select(this).style("fill", originalColor);
+                        d3.select(this).style("fill", originalColor)
+                            .style("stroke", "none");
                         chinaMapArea.selectAll(".regionText").remove();
 
                         d3.select(".regionInfo").remove();
@@ -561,7 +557,7 @@
                         //const filteredData = data.find(row => row.Region === selectedProvince);
                         //showHist(filteredData);
                         //updateLabels(selectedTopic, selectedProvince);
-                        
+
 
                     });
                 if (d === "GRP") {
@@ -649,9 +645,9 @@
                 console.log(d)
 
                 chinaMapArea.selectAll('path.topicPath')
-                        .style('stroke', null)
-                        .style('stroke-width', null)
-                        .style('fill', (d) => d3.select(this).attr("data-original-color"));
+                    .style('stroke', null)
+                    .style('stroke-width', null)
+                    .style('fill', (d) => d3.select(this).attr("data-original-color"));
 
                 // Apply highlight effect to the clicked region
                 d3.select(this)
@@ -681,29 +677,29 @@
                 const filteredData = data.find(row => row.Region === selectedProvince);
 
                 showHist(filteredData);
-                
+
                 updateLabels(selectedTopic, selectedProvince);
-            
+
             }
 
 
 
             // Append x-axis label
             histChartArea.append("text")
-            .attr("class", "x-axis-label")
-            .attr("x", histChartWidth / 2)
-            .attr("y", histChartHeight + 40)
-            .style("text-anchor", "middle")
-            .style("font-size", "14px");
+                .attr("class", "x-axis-label")
+                .attr("x", histChartWidth / 2)
+                .attr("y", histChartHeight + 40)
+                .style("text-anchor", "middle")
+                .style("font-size", "14px");
 
             // Append y-axis label
             histChartArea.append("text")
-            .attr("class", "y-axis-label")
-            .attr("transform", `rotate(-90)`)
-            .attr("x", -histChartHeight / 2)
-            .attr("y", -50)
-            .style("text-anchor", "middle")
-            .style("font-size", "14px");
+                .attr("class", "y-axis-label")
+                .attr("transform", `rotate(-90)`)
+                .attr("x", -histChartHeight / 2)
+                .attr("y", -50)
+                .style("text-anchor", "middle")
+                .style("font-size", "14px");
 
             function updateLabels(selectedTopic, selectedProvince) {
                 const topicLabels = {
@@ -713,15 +709,15 @@
                     "Consumption Expenditure": "Consumption Expenditure (Yuan)",
                     "Local Government Revenue": "Local Government Revenue (Yuan)"
                 };
-     
+
                 // Update x-axis label with selected topic
                 d3.select(".x-axis-label")
                     .text(`Year`);
-            
+
                 // Update y-axis label with selected topic
                 d3.select(".y-axis-label")
                     .text(`${topicLabels[selectedTopic]} of ${selectedProvince}`);
-            
+
             }
 
             //display the histogram
@@ -749,44 +745,44 @@
                     .attr('fill', '#8A1D12');
 
                 const valueScale = d3.scaleLinear()
-                    .domain([0, d3.max(yearData, d => d.value)]) 
-                    .range([histChartHeight, 0]); 
+                    .domain([0, d3.max(yearData, d => d.value)])
+                    .range([histChartHeight, 0]);
 
                 annotations.selectAll(".y.axis").remove();
                 annotations.selectAll(".y.gridlines").remove();
-                let leftAxis = d3.axisLeft(valueScale); 
+                let leftAxis = d3.axisLeft(valueScale);
                 let leftGridlines = d3.axisLeft(valueScale)
-                                        .tickSize(-histChartWidth-10)
-                                        .tickFormat("")
+                    .tickSize(-histChartWidth - 10)
+                    .tickFormat("")
                 annotations.append("g")
-                            .attr("class", "y axis")
-                            .attr("transform",`translate(${histMargin.left-10},${histMargin.top})`)
-                            .call(leftAxis)
+                    .attr("class", "y axis")
+                    .attr("transform", `translate(${histMargin.left - 10},${histMargin.top})`)
+                    .call(leftAxis)
                 annotations.append("g")
-                            .attr("class", "y gridlines")
-                            .attr("transform",`translate(${histMargin.left-10},${histMargin.top})`)
-                            .call(leftGridlines);
-                
-            
+                    .attr("class", "y gridlines")
+                    .attr("transform", `translate(${histMargin.left - 10},${histMargin.top})`)
+                    .call(leftGridlines);
+
+
                 const xScale = d3.scaleBand()
-                                .domain(d3.range(2004, 2025)) // Years from 2004 to 2024
-                                .range([0, histChartWidth])
-                                .padding(0.05);
+                    .domain(d3.range(2004, 2025)) // Years from 2004 to 2024
+                    .range([0, histChartWidth])
+                    .padding(0.05);
                 let bottomAxis = d3.axisBottom(xScale)
                 const xAxis = d3.axisBottom(x)
-                                .tickValues(yearData.map(d => d.year))
-                                .tickFormat(d => d);
+                    .tickValues(yearData.map(d => d.year))
+                    .tickFormat(d => d);
 
                 annotations.append("g")
-                            .attr("class", "x axis")
-                            .attr("transform", `translate(${histMargin.left}, ${histHeight - histMargin.bottom})`)
-                            .call(xAxis)
-                            .selectAll("text")
-                            .attr("transform", "rotate(-30)")
-                            .style("text-anchor", "middle");
-        }
+                    .attr("class", "x axis")
+                    .attr("transform", `translate(${histMargin.left}, ${histHeight - histMargin.bottom})`)
+                    .call(xAxis)
+                    .selectAll("text")
+                    .attr("transform", "rotate(-30)")
+                    .style("text-anchor", "middle");
+            }
 
-        
+
 
         }
         requestData();
@@ -797,147 +793,149 @@
         //
         // Usage example: drawLegend("#legendID", grossIncomeColorScale)
         function drawLegend(legendSelector, legendColorScale) {
-        
-        // This code should adapt to a variety of different kinds of color scales
-        //  Credit Prof. Rz if you are basing a legend on this structure, and note PERFORMANCE CONSIDERATIONS
-        
-        // Shrink legend bar by 5 px inwards from sides of SVG
-        const offsets = { width: 10,
-                            top: 2,
-                            bottom: 24 }; 
-        // Number of integer 'pixel steps' to draw when showing continuous scales
-        //    Warning, not using a canvas element so lots of rect tags will be created for low stepSize, causing issues with performance -- keep this large
-        const stepSize = 4; 
-        // Extend the minmax by 0% in either direction to expose more features by default
-        const minMaxExtendPercent = 0;
-        
-        
-        const legend = d3.select(legendSelector);
-        const legendHeight = legend.attr("height");
-        const legendBarWidth = legend.attr("width") - (offsets.width * 2);
-        const legendMinMax = d3.extent(legendColorScale.domain()); 
-                    // recover the min and max values from most kinds of numeric scales
-        const minMaxExtension = (legendMinMax[1] - legendMinMax[0]) * minMaxExtendPercent;
-        const barHeight = legendHeight - offsets.top - offsets.bottom;     
-        
-        // In this case the "data" are pixels, and we get numbers to use in colorScale
-        // Use this to make axis labels
-        let barScale = d3.scaleLinear().domain([legendMinMax[0]-minMaxExtension,
-                                                    legendMinMax[1]+minMaxExtension])
-                                        .range([0,legendBarWidth]);
-        let barAxis = d3.axisBottom(barScale);
-        
-        // Place for bar slices to live
-        let bar = legend.append("g")
-                        .attr("class", "legend colorbar")
-                        .attr("transform", `translate(${offsets.width},${offsets.top})`)
-        
-        // ****** SWITCHES FOR DIFFERENT SCALE TYPES ******
-        
-        // Check if we're using a binning scale - if so, we make blocks of color
-        if (legendColorScale.hasOwnProperty('thresholds') || legendColorScale.hasOwnProperty('quantiles')) {
-            // Get the thresholds
-            let thresholds = [];
-            if (legendColorScale.hasOwnProperty('thresholds')) { thresholds = legendColorScale.thresholds() }
-            else { thresholds = legendColorScale.quantiles() }
-            
-            const barThresholds = [legendMinMax[0], ...thresholds, legendMinMax[1]];
-            
-            // Use the quantile breakpoints plus the min and max of the scale as tick values
-            barAxis.tickValues(barThresholds);
-            
-            // Draw rectangles between the threshold segments
-            for (let i=0; i<barThresholds.length-1; i++) {
-            let dataStart = barThresholds[i];
-            let dataEnd = barThresholds[i+1];
-            let pixelStart = barAxis.scale()(dataStart);
-            let pixelEnd = barAxis.scale()(dataEnd);
-            
-            bar.append("rect")
-                .attr("x", pixelStart)
-                .attr("y", 0)
-                .attr("width", pixelEnd - pixelStart )
-                .attr("height", barHeight)
-                .style("fill", legendColorScale( (dataStart + dataEnd) / 2.0 ) ); 
+
+            // This code should adapt to a variety of different kinds of color scales
+            //  Credit Prof. Rz if you are basing a legend on this structure, and note PERFORMANCE CONSIDERATIONS
+
+            // Shrink legend bar by 5 px inwards from sides of SVG
+            const offsets = {
+                width: 10,
+                top: 2,
+                bottom: 24
+            };
+            // Number of integer 'pixel steps' to draw when showing continuous scales
+            //    Warning, not using a canvas element so lots of rect tags will be created for low stepSize, causing issues with performance -- keep this large
+            const stepSize = 4;
+            // Extend the minmax by 0% in either direction to expose more features by default
+            const minMaxExtendPercent = 0;
+
+
+            const legend = d3.select(legendSelector);
+            const legendHeight = legend.attr("height");
+            const legendBarWidth = legend.attr("width") - (offsets.width * 2);
+            const legendMinMax = d3.extent(legendColorScale.domain());
+            // recover the min and max values from most kinds of numeric scales
+            const minMaxExtension = (legendMinMax[1] - legendMinMax[0]) * minMaxExtendPercent;
+            const barHeight = legendHeight - offsets.top - offsets.bottom;
+
+            // In this case the "data" are pixels, and we get numbers to use in colorScale
+            // Use this to make axis labels
+            let barScale = d3.scaleLinear().domain([legendMinMax[0] - minMaxExtension,
+            legendMinMax[1] + minMaxExtension])
+                .range([0, legendBarWidth]);
+            let barAxis = d3.axisBottom(barScale);
+
+            // Place for bar slices to live
+            let bar = legend.append("g")
+                .attr("class", "legend colorbar")
+                .attr("transform", `translate(${offsets.width},${offsets.top})`)
+
+            // ****** SWITCHES FOR DIFFERENT SCALE TYPES ******
+
+            // Check if we're using a binning scale - if so, we make blocks of color
+            if (legendColorScale.hasOwnProperty('thresholds') || legendColorScale.hasOwnProperty('quantiles')) {
+                // Get the thresholds
+                let thresholds = [];
+                if (legendColorScale.hasOwnProperty('thresholds')) { thresholds = legendColorScale.thresholds() }
+                else { thresholds = legendColorScale.quantiles() }
+
+                const barThresholds = [legendMinMax[0], ...thresholds, legendMinMax[1]];
+
+                // Use the quantile breakpoints plus the min and max of the scale as tick values
+                barAxis.tickValues(barThresholds);
+
+                // Draw rectangles between the threshold segments
+                for (let i = 0; i < barThresholds.length - 1; i++) {
+                    let dataStart = barThresholds[i];
+                    let dataEnd = barThresholds[i + 1];
+                    let pixelStart = barAxis.scale()(dataStart);
+                    let pixelEnd = barAxis.scale()(dataEnd);
+
+                    bar.append("rect")
+                        .attr("x", pixelStart)
+                        .attr("y", 0)
+                        .attr("width", pixelEnd - pixelStart)
+                        .attr("height", barHeight)
+                        .style("fill", legendColorScale((dataStart + dataEnd) / 2.0));
+                }
             }
-        }
-        // Else if we have a continuous / roundable scale
-        //  In an ideal world you might construct a custom gradient mapped to the scale
-        //  For this one, we use a hack of making stepped rects
-        else if (legendColorScale.hasOwnProperty('rangeRound')) {
-            // NOTE: The barAxis may round min and max values to make them pretty
-            // ** This also means there is a risk of the legend going beyond scale bounds
-            // We need to use the barAxis min and max just to be sure the bar is complete
-            //    Using barAxis.scale().invert() goes from *axis* pixels to data values easily
-            // ** We also need to create patches for the scale if the labels exceed bounds
-            //     (floating point comparisons risky for small data ranges,but not a big deal
-            //      because patches will be indistinguishable from actual scale bottom)
-            // It's likely that scale clamping will actually do this for us elegantly
-            // ...but better to be safer and patch the regions anyways
-            
-            for (let i=0; i<legendBarWidth; i=i+stepSize) {
-            
-            let center = i+(stepSize/2);
-            let dataCenter = barAxis.scale().invert( center );
-            
-            // below normal scale bounds
-            if ( dataCenter < legendMinMax[0] ) { 
-                bar.append("rect")
-                .attr("x", i)
-                .attr("y", 0)
-                .attr("width", stepSize)
-                .attr("height",barHeight)
-                .style("fill", legendColorScale( legendMinMax[0] ) ); 
+            // Else if we have a continuous / roundable scale
+            //  In an ideal world you might construct a custom gradient mapped to the scale
+            //  For this one, we use a hack of making stepped rects
+            else if (legendColorScale.hasOwnProperty('rangeRound')) {
+                // NOTE: The barAxis may round min and max values to make them pretty
+                // ** This also means there is a risk of the legend going beyond scale bounds
+                // We need to use the barAxis min and max just to be sure the bar is complete
+                //    Using barAxis.scale().invert() goes from *axis* pixels to data values easily
+                // ** We also need to create patches for the scale if the labels exceed bounds
+                //     (floating point comparisons risky for small data ranges,but not a big deal
+                //      because patches will be indistinguishable from actual scale bottom)
+                // It's likely that scale clamping will actually do this for us elegantly
+                // ...but better to be safer and patch the regions anyways
+
+                for (let i = 0; i < legendBarWidth; i = i + stepSize) {
+
+                    let center = i + (stepSize / 2);
+                    let dataCenter = barAxis.scale().invert(center);
+
+                    // below normal scale bounds
+                    if (dataCenter < legendMinMax[0]) {
+                        bar.append("rect")
+                            .attr("x", i)
+                            .attr("y", 0)
+                            .attr("width", stepSize)
+                            .attr("height", barHeight)
+                            .style("fill", legendColorScale(legendMinMax[0]));
+                    }
+                    // within normal scale bounds
+                    else if (dataCenter < legendMinMax[1]) {
+                        bar.append("rect")
+                            .attr("x", i)
+                            .attr("y", 0)
+                            .attr("width", stepSize)
+                            .attr("height", barHeight)
+                            .style("fill", legendColorScale(dataCenter));
+                    }
+                    // above normal scale bounds
+                    else {
+                        bar.append("rect")
+                            .attr("x", i)
+                            .attr("y", 0)
+                            .attr("width", stepSize)
+                            .attr("height", barHeight)
+                            .style("fill", legendColorScale(legendMinMax[1]));
+                    }
+
+                }
             }
-            // within normal scale bounds
-            else if ( dataCenter < legendMinMax[1] ) {
-                bar.append("rect")
-                    .attr("x", i)
-                    .attr("y", 0)
-                    .attr("width", stepSize)
-                    .attr("height",barHeight)
-                    .style("fill", legendColorScale( dataCenter ) ); 
-            }
-            // above normal scale bounds
+            // Otherwise we have a nominal scale
             else {
-                bar.append("rect")
-                    .attr("x", i)
-                    .attr("y", 0)
-                    .attr("width", stepSize)
-                    .attr("height",barHeight)
-                    .style("fill", legendColorScale( legendMinMax[1] ) ); 
+                let nomVals = legendColorScale.domain().sort();
+
+                // Use a scaleBand to make blocks of color and simple labels
+                let barScale = d3.scaleBand().domain(nomVals)
+                    .range([0, legendBarWidth])
+                    .padding(0.05);
+                barAxis.scale(barScale);
+
+                // Draw rectangles for each nominal entry
+                nomVals.forEach(d => {
+                    bar.append("rect")
+                        .attr("x", barScale(d))
+                        .attr("y", 0)
+                        .attr("width", barScale.bandwidth())
+                        .attr("height", barHeight)
+                        .style("fill", legendColorScale(d));
+                });
             }
-            
-            }
-        }
-        // Otherwise we have a nominal scale
-        else {
-            let nomVals = legendColorScale.domain().sort();
-            
-            // Use a scaleBand to make blocks of color and simple labels
-            let barScale = d3.scaleBand().domain(nomVals)
-                                        .range([0,legendBarWidth])
-                                        .padding(0.05);
-            barAxis.scale(barScale);
-            
-            // Draw rectangles for each nominal entry
-            nomVals.forEach( d => {
-            bar.append("rect")
-                .attr("x", barScale(d) )
-                .attr("y", 0)
-                .attr("width", barScale.bandwidth() )
-                .attr("height", barHeight)
-                .style("fill", legendColorScale( d ) );
-            });
-        }
-        // DONE w/SWITCH
-        
-        // Finally, draw legend labels
-        legend.append("g")
+            // DONE w/SWITCH
+
+            // Finally, draw legend labels
+            legend.append("g")
                 .attr("class", "legend axis")
-                .attr("transform",`translate(${offsets.width},${offsets.top+barHeight+5})`)
+                .attr("transform", `translate(${offsets.width},${offsets.top + barHeight + 5})`)
                 .call(barAxis);
-        
+
         }
 
     </script>
