@@ -748,8 +748,13 @@
                     .attr('height', d => histChartHeight - y(d.value))
                     .attr('fill', '#8A1D12');
 
-                const valueScale = d3.scaleLinear().domain([0,1]).range([histChartHeight, 0]);
-                let leftAxis = d3.axisLeft(valueScale).tickFormat(d3.format('.0%'));
+                const valueScale = d3.scaleLinear()
+                    .domain([0, d3.max(yearData, d => d.value)]) 
+                    .range([histChartHeight, 0]); 
+
+                annotations.selectAll(".y.axis").remove();
+                annotations.selectAll(".y.gridlines").remove();
+                let leftAxis = d3.axisLeft(valueScale); 
                 let leftGridlines = d3.axisLeft(valueScale)
                                         .tickSize(-histChartWidth-10)
                                         .tickFormat("")
