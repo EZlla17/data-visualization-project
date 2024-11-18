@@ -611,7 +611,7 @@
 
 
             // Zoom in and show histogram starts here
-
+            // Zoom in when scrolling
             var zoom = d3.zoom()
                 .scaleExtent([1, 20])
                 .translateExtent([[-50, -50], [chinaMapWidth + 50, chinaMapHeight + 50]])
@@ -628,6 +628,8 @@
 
             }
 
+            //When clicking on specific province, zoom in to focus on that province,
+            //update the data for histogram accordingly
             chinaMapArea.selectAll('path.topicPath').on("click", clicked)
 
             function getDataByTopic(topic) {
@@ -717,7 +719,7 @@
             
             }
 
-
+            //display the histogram
             function showHist(data) {
                 const yearData = Object.keys(data)
                     .filter(key => !isNaN(key))
