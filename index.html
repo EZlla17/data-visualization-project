@@ -533,7 +533,7 @@
 
 
             let lastClickedTopicButton = null;
-            //let selectedProvince = null;
+            let selectedProvince = null;
 
 
             topicList.forEach(d => {
@@ -548,13 +548,17 @@
                         }
                         d3.select(this).classed("clicked", true);
                         lastClickedTopicButton = this;
+                        selectedTopic = d;
+
                         topicAnimated(d);
 
-                        // 尝试在切换topic的时候换histogram的数据但是失败了:)
-                        //const data = getDataByTopic(selectedTopic);
-                        //const filteredData = data.find(row => row.Region === selectedProvince);
-                        //showHist(filteredData);
-                        //updateLabels(selectedTopic, selectedProvince);
+                        if (selectedProvince) {
+                            const data = getDataByTopic(selectedTopic); 
+                            const filteredData = data.find(row => row.Region === selectedProvince);
+                            showHist(filteredData); 
+                            updateLabels(selectedTopic, selectedProvince); 
+                        }
+
 
 
                     });
@@ -670,7 +674,7 @@
 
                 chinaMapArea.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
 
-                const selectedProvince = regionList[d.index];
+                selectedProvince = regionList[d.index];
                 const data = getDataByTopic(selectedTopic);
                 const filteredData = data.find(row => row.Region === selectedProvince);
 
