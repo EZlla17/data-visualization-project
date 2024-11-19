@@ -153,8 +153,6 @@
         border-radius: 10px;
         cursor: pointer;
     }
-
-
 </style>
 
 </html>
@@ -167,7 +165,7 @@
 
     <!-- Create a svg for China map -->
     <div style="display: flex; flex-direction: row;">
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div style="display: flex; flex-direction: column; align-items: center;">
             <div style="display: flex; flex-direction: row;">
                 <svg id="china" width="700" height="700" style="margin-left:30px;"></svg>
 
@@ -726,6 +724,23 @@
 
             //display the histogram
             function showHist(data) {
+                const gradient = histSvg.append("defs")
+                    .append("linearGradient")
+                    .attr("id", "gradient")
+                    .attr("x1", "0%")
+                    .attr("x2", "0%")
+                    .attr("y1", "0%")
+                    .attr("y2", "100%");
+
+                gradient.append("stop")
+                    .attr("offset", "0%")
+                    .attr("stop-color", "#E97A63") // Top color
+                    .attr("stop-opacity", 1);
+
+                gradient.append("stop")
+                    .attr("offset", "100%")
+                    .attr("stop-color", "#DC6142") // Bottom color
+                    .attr("stop-opacity", 1);
                 const yearData = Object.keys(data)
                     .filter(key => !isNaN(key))
                     .map(year => ({ year: +year, value: data[year] }));
@@ -746,8 +761,8 @@
                     .attr('y', d => y(d.value))
                     .attr('width', x.bandwidth())
                     .attr('height', d => histChartHeight - y(d.value))
-                    .attr('fill', '#8A1D12');
-
+                    .attr('fill', 'url(#gradient)');
+                
                 const valueScale = d3.scaleLinear()
                     .domain([0, d3.max(yearData, d => d.value)])
                     .range([histChartHeight, 0]);
@@ -766,7 +781,9 @@
                 annotations.append("g")
                     .attr("class", "y gridlines")
                     .attr("transform", `translate(${histMargin.left - 10},${histMargin.top})`)
-                    .call(leftGridlines);
+                    .call(leftGridlines)
+                    .style("stroke", "#cccccc") // Light gray
+                    .style("stroke-dasharray", "3,3"); // Dashed lines;
 
 
                 const xScale = d3.scaleBand()
@@ -783,8 +800,24 @@
                     .attr("transform", `translate(${histMargin.left}, ${histHeight - histMargin.bottom})`)
                     .call(xAxis)
                     .selectAll("text")
-                    .attr("transform", "rotate(-30)")
-                    .style("text-anchor", "middle");
+                    .attr("transform", "rotate(-30)");
+                    // .style("text-anchor", "middle");
+                
+                    d3.select(".x.axis").selectAll("line, path")
+                        .style("stroke", "#333333");
+
+                    d3.select(".y.axis").selectAll("line, path")
+                        .style("stroke", "#333333");
+
+                    d3.select(".x.axis").selectAll("text")
+                        .style("font-family", "Roboto")
+                        .style("font-size", "12px")
+                        .style("fill", "#333333");
+
+                    d3.select(".y.axis").selectAll("text")
+                        .style("font-family", "Roboto")
+                        .style("font-size", "12px")
+                        .style("fill", "#333333");
             }
 
 
