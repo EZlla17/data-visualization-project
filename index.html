@@ -443,6 +443,7 @@
 
             }
 
+
             function topicAnimated(topicKey) {
                 selectedTopic = topicKey;
                 updateMapColors();
@@ -659,7 +660,7 @@
                 const transform = d3.zoomTransform(chinaMapArea.node());
                 //zoomedOut = d3.zoomTransform(chinaMapArea.node()).k === 1;
             
-                zoomedOut = transform.k === 1; // Update the zoomedOut flag based on zoom level
+                zoomedOut = transform.k <= 5; // Update the zoomedOut flag based on zoom level
                 console.log(`Zoom End - Zoomed Out: ${zoomedOut}`); // Debugging log
             
                 if (zoomedOut) {
