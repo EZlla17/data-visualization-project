@@ -191,6 +191,9 @@
                    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', 
                    Geneva, Verdana, sans-serif;">Choose the data topic:</p>
                     <div id="topicButtons"></div>
+                    <button id="resetButton" style="margin-top: 20px; padding: 10px; background-color: #808080; color: white; border: none; cursor: pointer;">
+                        Reset Map
+                    </button>
                     <svg id="colorLegend" height="50" width="550" style=" margin-top:30px;"></svg>
                 </div>
             </div>
@@ -322,6 +325,8 @@
             let selectedYearRange = "2014";
             let selectedTopic = "GRP";
 
+            let zoomedOut = true; 
+
             //Update the map in response to the topic button and year button
             function updateMapColors() {
                 d3.select("#colorLegend").selectAll("*").remove();
@@ -359,8 +364,6 @@
 
                 drawLegend("#colorLegend", colorScale);
 
-
-
                 //add topicPath to the map
                 chinaMapArea.selectAll("path.topicPath")
                     .data(region.features)
@@ -368,24 +371,19 @@
                     .attr("class", "topicPath")
                     .attr("d", path)
                     .style("fill", d => {
-                        const regionData = data.find(element => element["Region"] === regionList[d.index]);
-                        if (regionData != undefined && !isNaN(regionData[selectedYear])) {
-                            console.log(regionData[selectedYear]);
-                            d.regionData = regionData[selectedYear];
-                            return colorScale(regionData[selectedYear])
-                        } else {
-                            d.regionData = "Data not yet available";
-                            return "grey"
-                        }
-
+                        const regionData = data.find(row => row.Region === regionList[d.index]);
+                        const color = regionData ? colorScale(regionData[selectedYear]) : "#808080"; // Default gray for missing data
+                        return color;
+                    })
+                    .attr("data-original-color", d => {
+                        const regionData = data.find(row => row.Region === regionList[d.index]);
+                        const color = regionData ? colorScale(regionData[selectedYear]) : "#808080"; // Default to gray
+                        return color;
                     })
                     .on("mouseover", function (event, d) {
-                        const originalColor = d3.select(this).style("fill");
-                        d3.select(this).attr("data-original-color", originalColor);
-                        d3.select(this).style("fill", "#F4F8F1");
+                        const originalColor = d3.select(this).attr("data-original-color");
+                        d3.select(this).style("fill", "#F4F8F1"); // Highlight on hover
 
-
-                        //How to get cursor position: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/pageX 
                         const x = event.pageX;
                         const y = event.pageY;
                         d3.select("body").append("div")
@@ -393,28 +391,28 @@
                             .style("position", "absolute")
                             .style("top", `${y}px`)
                             .style("left", `${x}px`);
-
-
+                    
                         d3.select(".regionInfo").append("span")
                             .attr("class", "regionTitle")
                             .text(regionListCN[d.index]);
-
+                    
                         d3.select(".regionInfo").append("span")
                             .attr("class", "regionText")
                             .text(regionList[d.index]);
-
+                    
                         d3.select(".regionInfo").append("span")
                             .attr("class", "regionText")
                             .style("font-weight", "bold")
                             .style("margin-top", 5)
                             .text(`${selectedTopic + ": "}`);
-
+                    
                         d3.select(".regionInfo").append("span")
                             .attr("class", "regionText")
                             .text(d.regionData);
 
-
+                        console.log(`mouseover: Checking zoomedOut = ${zoomedOut}`);
                     })
+                    
                     .on("mousemove", function (event, d) {
                         const x = event.pageX;
                         const y = event.pageY;
@@ -423,12 +421,24 @@
                             .style("left", `${x}px`)
                     })
                     .on("mouseout", function (event, d) {
+                        const isClicked = d3.select(this).attr("data-clicked") === "true";
                         const originalColor = d3.select(this).attr("data-original-color");
-                        d3.select(this).style("fill", originalColor);
-                        chinaMapArea.selectAll(".regionText").remove();
 
+                        console.log(zoomedOut)
+                    
+                        if (zoomedOut) {
+                            // If zoomed out, always restore the original color
+                            d3.select(this).style("fill", originalColor);
+                        } else {
+                            // Otherwise, check if the region is clicked or revert to gray
+                            d3.select(this).style("fill", isClicked ? originalColor : "#808080");
+                        }
+                    
                         d3.select(".regionInfo").remove();
-                    })
+                        console.log(`mouseout: Zoomed Out = ${zoomedOut}`);
+                    });
+                    
+                    
 
 
             }
@@ -571,7 +581,6 @@
 
 
 
-
             const buttonWidth = d3.select(".yearButton").node().offsetWidth;
             //create linearScale for yearLine
             const yearLineScale = d3.scaleLinear()
@@ -612,13 +621,13 @@
 
 
 
-
             // Zoom in and show histogram starts here
             // Zoom in when scrolling
             var zoom = d3.zoom()
                 .scaleExtent([1, 20])
                 .translateExtent([[-50, -50], [chinaMapWidth + 50, chinaMapHeight + 50]])
-                .on("zoom", mapZoomed);
+                .on("zoom", mapZoomed)
+                .on("end", zoomEnd); 
 
             chinaMapArea.call(zoom);
 
@@ -627,9 +636,42 @@
             function mapZoomed({ transform }) {
                 chinaMapArea.attr("transform", transform.toString());
                 chinaMapArea.select('.outline')
-                    .style('stroke-width', 1 / transform.k);
+                    .style('stroke-width', 1 / transform.k)
+                    .attr("zoomedOut", "false");
 
             }
+
+
+            function zoomEnd() {
+                const transform = d3.zoomTransform(chinaMapArea.node());
+            
+                if (transform.k === 1) { // Check if fully zoomed out
+                    chinaMapArea.selectAll("path.topicPath")
+                        .each(function () {
+                            const originalColor = d3.select(this).attr("data-original-color");
+                            d3.select(this).style("fill", originalColor)
+                                            .attr("zoomedOut", "true");
+                        });
+                }
+            }
+
+            function zoomEnd() {
+                const transform = d3.zoomTransform(chinaMapArea.node());
+                //zoomedOut = d3.zoomTransform(chinaMapArea.node()).k === 1;
+            
+                zoomedOut = transform.k === 1; // Update the zoomedOut flag based on zoom level
+                console.log(`Zoom End - Zoomed Out: ${zoomedOut}`); // Debugging log
+            
+                if (zoomedOut) {
+                    chinaMapArea.selectAll("path.topicPath")
+                        .each(function () {
+                            const originalColor = d3.select(this).attr("data-original-color");
+                            d3.select(this).style("fill", originalColor); // Restore original colors
+                        });
+                }
+                console.log(`zoomEnd: Zoomed Out set to ${zoomedOut}`);
+            }
+
 
             //When clicking on specific province, zoom in to focus on that province,
             //update the data for histogram accordingly
@@ -643,19 +685,34 @@
                 if (topic === "Local Government Revenue") return localGovernRevenue;
             }
 
+
+            let lastClickedRegion = null;
+
             function clicked(event, d) {
-                console.log(d)
-
-                chinaMapArea.selectAll('path.topicPath')
-                    .style('stroke', null)
-                    .style('stroke-width', null)
-                    .style('fill', (d) => d3.select(this).attr("data-original-color"));
-
-                // Apply highlight effect to the clicked region
+                //console.log(d)
+                //console.log(this.attr('data-original-color'))
+                //console.log(d3.select(this).attr('data-original-color'));
+                zoomedOut = false;
                 d3.select(this)
-                    .style('stroke', 'white')
-                    .style('stroke-width', 1)
-                    .style('fill', '#FF5733');
+                    .style("fill", d3.select(this).attr("data-original-color")) // Restore original color
+                    .style("stroke", "white")
+                    .attr("data-clicked", "true")
+                    .style("stroke-width", 1.5);
+
+                if (lastClickedRegion && lastClickedRegion !== this) {
+                    d3.select(lastClickedRegion)
+                        .attr("data-clicked", null)
+                        .style("fill", zoomedOut ? d3.select(lastClickedRegion).attr("data-original-color") : "#808080"); // New fix
+                }
+
+                chinaMapArea.selectAll("path.topicPath")
+                        .style("fill", "#808080") // Set all other regions to gray
+                        .style("stroke", null)
+                        .style("stroke-width", null);
+            
+            
+                // Update the global variable to the newly clicked region
+                lastClickedRegion = this;
 
 
                 let bounds = path.bounds(d);
@@ -681,6 +738,8 @@
                 showHist(filteredData);
 
                 updateLabels(selectedTopic, selectedProvince);
+
+                console.log(`clicked: Zoomed Out set to ${zoomedOut}`);
 
             }
 
@@ -820,8 +879,15 @@
                         .style("fill", "#333333");
             }
 
-
-
+            d3.select("#resetButton").on("click", function () {
+                chinaMapArea.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+            
+                chinaMapArea.selectAll("path.topicPath")
+                    .each(function () {
+                        const originalColor = d3.select(this).attr("data-original-color");
+                        d3.select(this).style("fill", originalColor);
+                    });
+            });
         }
         requestData();
 
@@ -966,7 +1032,6 @@
                         .style("fill", legendColorScale(d));
                 });
             }
-            // DONE w/SWITCH
 
             // Finally, draw legend labels
             legend.append("g")
