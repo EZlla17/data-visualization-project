@@ -750,6 +750,7 @@
                     .domain([0, d3.max(yearData, d => d.value)])
                     .range([histChartHeight, 0]);
 
+                annotations.selectAll(".x.axis").remove();
                 annotations.selectAll(".y.axis").remove();
                 annotations.selectAll(".y.gridlines").remove();
                 let leftAxis = d3.axisLeft(valueScale);
