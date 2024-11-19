@@ -84,6 +84,38 @@
         color: #F4F8F1;
     }
 
+    #resetButton{
+        margin-top: 20px;
+        padding: 10px; 
+        background: #959595; 
+        font-size: 12px;
+        font-weight: bold;
+        color: white; 
+        border:none;
+        border-radius:5px;
+        position: relative;
+        transition: 0.1s;
+        letter-spacing: 1px;
+        width:200px;
+        box-shadow: #808080 0px 6px 2px, #000000e0 0px 8px 5px;
+    }
+
+    #resetButton:hover{
+        background: #6d6d6d; 
+        box-shadow: #535353 0px 6px 2px, #000000e0 0px 8px 5px;
+    }
+
+
+    #resetButton:active {
+        top: 2px;
+        box-shadow: #535353 0px 3px 2px, #000000e0 0px 3px 5px;
+    }
+
+    #resetButton.clicked {
+        background: #6d6d6d;
+        box-shadow: #535353 0px 6px 2px, #000000e0 0px 8px 5px;
+    }
+
     .regionInfo {
         display: flex;
         flex-direction: column;
@@ -158,7 +190,7 @@
 </html>
 
 <body>
-    <h1 style="display: flex; align-items: center; justify-content: center; font-size: 50px;">China’s Economic Pulse
+    <h1 style="display: flex; align-items: center; justify-content: center; font-size: 50px; margin-bottom: 20px;">China’s Economic Pulse
         Over The Years</h1>
     <p style="color:#50150A; display: flex; align-items: center; justify-content: center;"><strong>Group
             member:</strong> Xinyi Zhou(xz255) | Minghan Gao(mg2328) | Warren Hua(wsh48)</p>
@@ -167,7 +199,7 @@
     <div style="display: flex; flex-direction: row;">
         <div style="display: flex; flex-direction: column; align-items: center;">
             <div style="display: flex; flex-direction: row;">
-                <svg id="china" width="700" height="700" style="margin-left:30px;"></svg>
+                <svg id="china" width="700" height="700" style="margin-left:30px; margin-top:20px;"></svg>
 
                 <div style="display: flex; flex-direction: column; margin-left: 50px;">
                     <p style="color:#8A1D12; margin-bottom: 5px; font-weight: bold; margin-top:40px; margin-bottom: 10px;
@@ -191,7 +223,7 @@
                    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', 
                    Geneva, Verdana, sans-serif;">Choose the data topic:</p>
                     <div id="topicButtons"></div>
-                    <button id="resetButton" style="margin-top: 20px; padding: 10px; background-color: #808080; color: white; border: none; cursor: pointer;">
+                    <button id="resetButton">
                         Reset Map
                     </button>
                     <svg id="colorLegend" height="50" width="550" style=" margin-top:30px;"></svg>
@@ -343,6 +375,8 @@
                     data = localGovernRevenue;
                 }
 
+
+                //get all data of the topic
                 let allData = [];
                 data.forEach(element => {
                     for (const key in element) {
@@ -352,7 +386,7 @@
                     }
                 });
 
-
+                //get the extent of the the data of the topic
                 const extent = d3.extent(allData);
                 console.log(extent);
 
