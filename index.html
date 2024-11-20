@@ -23,6 +23,7 @@
         stroke-width: 1px;
     }
 
+    /* topic button syle */
     #topicButtons {
         display: grid;
         grid-template-columns: repeat(2, 250px);
@@ -47,29 +48,34 @@
         box-shadow: #c0392b 0px 6px 2px, #000000e0 0px 8px 5px;
     }
 
+    /* when hover */
     .topicButton:hover {
         background: #cb3e2e;
         box-shadow: #aa3326 0px 6px 2px, #000000e0 0px 8px 5px;
         opacity: 1;
     }
 
+    /* animation after click*/
     .topicButton:active {
         top: 2px;
         box-shadow: #c0392b 0px 3px 2px, #000000e0 0px 3px 5px;
         opacity: 1;
     }
 
+    /* when clickedk*/
     .topicButton.clicked {
         background: #cb3e2e;
         box-shadow: #aa3326 0px 6px 2px, #000000e0 0px 8px 5px;
         opacity: 1;
     }
 
+    /* style for the year Button*/
     .yearButton {
         background: none;
         border: none;
     }
 
+    /* style when hover the button*/
     .yearButton:hover {
         background: #DC6142;
         border-radius: 5px;
@@ -77,6 +83,7 @@
         color: #F4F8F1;
     }
 
+    /* style when cicked the button*/
     .yearButton.clicked {
         background: #DC6142;
         border-radius: 5px;
@@ -84,6 +91,7 @@
         color: #F4F8F1;
     }
 
+    /* style for the reset button*/
     #resetButton {
         margin-top: 20px;
         padding: 10px;
@@ -100,22 +108,26 @@
         box-shadow: #808080 0px 6px 2px, #000000e0 0px 8px 5px;
     }
 
+    /* style for the reset button when hover*/
     #resetButton:hover {
         background: #6d6d6d;
         box-shadow: #535353 0px 6px 2px, #000000e0 0px 8px 5px;
     }
 
 
+    /* animation when click the reset button*/
     #resetButton:active {
         top: 2px;
         box-shadow: #535353 0px 3px 2px, #000000e0 0px 3px 5px;
     }
 
+    /* style for the reset button after clicked*/
     #resetButton.clicked {
         background: #6d6d6d;
         box-shadow: #535353 0px 6px 2px, #000000e0 0px 8px 5px;
     }
 
+    /* style for the information for region when mouseover*/
     .regionInfo {
         display: flex;
         flex-direction: column;
@@ -129,6 +141,7 @@
         opacity: 0.8;
     }
 
+    /* style for the region text*/
     .regionText {
         font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
         color: black;
@@ -136,6 +149,7 @@
         text-align: center;
     }
 
+    /* style for the region title*/
     .regionTitle {
         font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
         color: black;
@@ -144,6 +158,7 @@
         text-align: center;
     }
 
+    /* style for the range bar*/
     #yearRange {
         -webkit-appearance: none;
         appearance: none;
@@ -154,6 +169,7 @@
         width: 15rem;
     }
 
+    /* style for the scroll bar of the range bar*/
     #yearRange::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
@@ -340,10 +356,10 @@
                 }
             });
 
-            console.log(population);
-            console.log(grp);
+            // console.log(population);
+            // console.log(grp);
 
-
+            //add index to each feature
             region.features.forEach((feature, i) => {
                 feature.index = i;
             });
@@ -426,6 +442,7 @@
                         }
                         return color;
                     })
+                    //keep the original data color for future use
                     .attr("data-original-color", d => {
                         const regionData = data.find(row => row.Region === regionList[d.index]);
                         let color;
@@ -444,6 +461,7 @@
                         }
                         return color;
                     })
+                    //add mouseover effect
                     .on("mouseover", function (event, d) {
                         if (!hoverEnabled) return;
                         currentZoomIndex = d3.zoomTransform(chinaMapArea.node()).k;
@@ -451,10 +469,22 @@
                         if (currentZoomIndex != clickedZoomIndex) {
                             const originalColor = d3.select(this).attr("data-original-color");
                             const regionData = getDataByTopic(selectedTopic).find(row => row.Region === regionList[d.index]);
-                            const value = regionData ? regionData[selectedYear] : "N/A"; // Extract the correct value
 
-                            d3.select(this).style("fill", "#2E4E7E"); // Highlight on hover
+                            if (regionData !== undefined) {
+                                if (regionData[selectedYear] != undefined) {
+                                    value=regionData[selectedYear];
+                                } else {
+                                    //defualt value when data not available
+                                    value="Data not yet availabe";
+                                }
+                            } else {
+                                value="Data not yet availabe";
+                            }
 
+                            d3.select(this).style("fill", "#2E4E7E");
+
+                            //get the position of mouse cursor
+                            //reference: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/pageX
                             const x = event.pageX;
                             const y = event.pageY;
                             d3.select("body").append("div")
@@ -484,8 +514,7 @@
 
                         }
                     })
-
-
+                    //add mousemove effect
                     .on("mousemove", function (event, d) {
                         if (!hoverEnabled) return;
                         currentZoomIndex = d3.zoomTransform(chinaMapArea.node()).k;
@@ -497,6 +526,7 @@
                                 .style("left", `${x}px`)
                         }
                     })
+                    //add mouseout effect
                     .on("mouseout", function () {
                         if (!hoverEnabled) return;
                         currentZoomIndex = d3.zoomTransform(chinaMapArea.node()).k;
@@ -506,12 +536,11 @@
                         if (currentZoomIndex != clickedZoomIndex) {
                             // Restore original color
                             d3.select(this).style("fill", d3.select(this).attr("data-original-color"));
+                            //remove the regionInfo div
                             d3.select(".regionInfo").remove();
                         }
-                        //d3.select(".regionInfo").remove();
                     });
             }
-
 
 
             function topicAnimated(topicKey) {
@@ -525,10 +554,11 @@
 
             }
 
-
+            //set default clickedYearRangeButton and lastClickedYearButton
             let lastClickedYearRangeButton = null;
             let lastClickedYearButton = null;
 
+            //add yearRange buttons
             yearRange.forEach(d => {
                 d3.select("#yearRangeBar")
                     .append("button")
@@ -551,6 +581,7 @@
                     yearRangeAnimated(d);
                 }
             });
+
 
             function yearRangeAnimated(yearRangeKey) {
                 d3.select("#yearBar").selectAll(".yearButton").remove();
@@ -613,9 +644,9 @@
             });
 
 
+            //set defualt lastClickedTopicButton and selectedProvinceButton
             let lastClickedTopicButton = null;
             let selectedProvince = null;
-
 
             topicList.forEach(d => {
                 d3.select("#topicButtons")
@@ -770,7 +801,7 @@
                     .attr("y", 20)
                     .attr("class", "temporary-notification")
                     .text("Animation locked when province being selected, ")
-                    .style("fill","#DC6142")
+                    .style("fill", "black")
                     .attr("font-size", 20)
 
                 d3.select("#china").append("text")
@@ -778,13 +809,13 @@
                     .attr("y", 50)
                     .attr("class", "temporary-notification2")
                     .text("zoom in/out to resume animation or click the reset button.")
-                    .style("fill","#DC6142")
+                    .style("fill", "black")
                     .attr("font-size", 20)
 
                 setTimeout(() => {
                     d3.select(".temporary-notification").remove();
                     d3.select(".temporary-notification2").remove();
-                }, 3000);
+                }, 4000);
 
                 // Highlight only the selected province and gray out others
                 chinaMapArea.selectAll("path.topicPath")
