@@ -959,9 +959,9 @@
 
             // In this case the "data" are pixels, and we get numbers to use in colorScale
             // Use this to make axis labels
-            let barScale = d3.scaleLinear().domain([legendMinMax[0] - minMaxExtension,
-            legendMinMax[1] + minMaxExtension])
-                .range([0, legendBarWidth]);
+            let barScale = d3.scaleLinear()
+                .domain([legendMinMax[0], legendMinMax[1]]) 
+                .range([10, legendBarWidth - 10]); 
             let barAxis = d3.axisBottom(barScale);
 
             // Place for bar slices to live
