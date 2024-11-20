@@ -410,29 +410,51 @@
                     .attr("class", "topicPath")
                     .attr("d", path)
                     .style("fill", d => {
-                        if (selectedYear > 2023) {
-                        return "#808080";
-                    }
                         const regionData = data.find(row => row.Region === regionList[d.index]);
-                        const color = regionData ? colorScale(regionData[selectedYear]) : "#808080"; // Default gray for missing data
+                        let color;
+                        console.log(regionData);
+                        if (regionData !== undefined) {
+                            if (regionData[selectedYear] != undefined) {
+                                color = colorScale(regionData[selectedYear]);
+                            } else {
+                                //defualt color for unavailable data.
+                                color = "#808080";
+                            }
+                        } else {
+
+                            color = "#808080";
+                        }
                         return color;
                     })
                     .attr("data-original-color", d => {
                         const regionData = data.find(row => row.Region === regionList[d.index]);
-                        const color = regionData ? colorScale(regionData[selectedYear]) : "#808080"; // Default to gray
+                        let color;
+                        console.log(regionData);
+                        if (regionData !== undefined) {
+                            if (regionData[selectedYear] != undefined && !isNaN(regionData[selectedYear])) {
+                                console.log("check")
+                                console.log(regionData[selectedYear])
+                                color = colorScale(regionData[selectedYear]);
+                            } else {
+                                color = "#808080";
+                            }
+                        } else {
+
+                            color = "#808080";
+                        }
                         return color;
                     })
                     .on("mouseover", function (event, d) {
                         if (!hoverEnabled) return;
                         currentZoomIndex = d3.zoomTransform(chinaMapArea.node()).k;
-                    
+
                         if (currentZoomIndex != clickedZoomIndex) {
                             const originalColor = d3.select(this).attr("data-original-color");
                             const regionData = getDataByTopic(selectedTopic).find(row => row.Region === regionList[d.index]);
                             const value = regionData ? regionData[selectedYear] : "N/A"; // Extract the correct value
-                    
+
                             d3.select(this).style("fill", "#2E4E7E"); // Highlight on hover
-                    
+
                             const x = event.pageX;
                             const y = event.pageY;
                             d3.select("body").append("div")
@@ -440,29 +462,29 @@
                                 .style("position", "absolute")
                                 .style("top", `${y}px`)
                                 .style("left", `${x}px`);
-                    
+
                             d3.select(".regionInfo").append("span")
                                 .attr("class", "regionTitle")
                                 .text(regionListCN[d.index]);
-                    
+
                             d3.select(".regionInfo").append("span")
                                 .attr("class", "regionText")
                                 .text(regionList[d.index]);
-                    
+
                             d3.select(".regionInfo").append("span")
                                 .attr("class", "regionText")
                                 .style("font-weight", "bold")
                                 .style("margin-top", 5)
                                 .text(`${selectedTopic + ": "}`);
-                    
+
+                            // Display value of 
                             d3.select(".regionInfo").append("span")
                                 .attr("class", "regionText")
-                                .text(value); // Display the extracted value here
-                    
-                            // console.log(`mouseover: Checking zoomedOut = ${zoomedOut}`);
+                                .text(value);
+
                         }
                     })
-                    
+
 
                     .on("mousemove", function (event, d) {
                         if (!hoverEnabled) return;
@@ -685,9 +707,9 @@
                 chinaMapArea.select('.outline')
                     .style('stroke-width', 1 / transform.k)
                     .attr("zoomedOut", "false");
-            
+
                 currentZoomIndex = d3.zoomTransform(chinaMapArea.node()).k;
-            
+
                 if (clickedZoomIndex !== null && currentZoomIndex !== clickedZoomIndex) {
                     chinaMapArea.selectAll("path.topicPath")
                         .each(function () {
@@ -695,15 +717,15 @@
                             d3.select(this).style("fill", originalColor)
                                 .on("click", clicked); // Re-enable clicks
                         });
-            
+
                     clickedZoomIndex = null; // Reset clicked zoom index
                     selectedProvince = null; // Clear any selected province
                 }
-            
+
                 hoverEnabled = false; // Disable hover during zoom
                 d3.select(".regionInfo").remove(); // Clear any active tooltip
             }
-            
+
 
 
             function zoomEnd() {
@@ -721,7 +743,7 @@
                         });
                 }
                 console.log(`zoomEnd: Zoomed Out set to ${zoomedOut}`);
-                hoverEnabled = true; 
+                hoverEnabled = true;
             }
 
 
@@ -742,7 +764,28 @@
 
             function clicked(event, d) {
                 zoomedOut = false;
-            
+
+                d3.select("#china").append("text")
+                    .attr("x", 10)
+                    .attr("y", 20)
+                    .attr("class", "temporary-notification")
+                    .text("Animation locked when province being selected, ")
+                    .style("fill","#DC6142")
+                    .attr("font-size", 20)
+
+                d3.select("#china").append("text")
+                    .attr("x", 10)
+                    .attr("y", 50)
+                    .attr("class", "temporary-notification2")
+                    .text("zoom in/out to resume animation or click the reset button.")
+                    .style("fill","#DC6142")
+                    .attr("font-size", 20)
+
+                setTimeout(() => {
+                    d3.select(".temporary-notification").remove();
+                    d3.select(".temporary-notification2").remove();
+                }, 3000);
+
                 // Highlight only the selected province and gray out others
                 chinaMapArea.selectAll("path.topicPath")
                     .each(function () {
@@ -761,9 +804,9 @@
                                 .on("click", null); // Disable click on other regions
                         }
                     });
-            
+
                 lastClickedRegion = event.target;
-            
+
                 // Calculate zoom transform for the selected province
                 let bounds = path.bounds(d);
                 let dx = bounds[1][0] - bounds[0][0];
@@ -772,7 +815,7 @@
                 let y = (bounds[0][1] + bounds[1][1]) / 2;
                 let scale = Math.max(1, Math.min(10, 0.9 / Math.max(dx / chinaMapWidth, dy / chinaMapHeight)));
                 let translate = [chinaMapWidth / 2 - x * scale, chinaMapHeight / 2 - y * scale];
-            
+
                 chinaMapArea.transition()
                     .duration(750)
                     .call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale))
@@ -780,16 +823,16 @@
                     .then(() => {
                         clickedZoomIndex = d3.zoomTransform(chinaMapArea.node()).k; // Store zoom level on click
                     });
-            
+
                 selectedProvince = regionList[d.index];
                 const data = getDataByTopic(selectedTopic);
                 const filteredData = data.find(row => row.Region === selectedProvince);
-            
+
                 showHist(filteredData);
                 updateLabels(selectedTopic, selectedProvince);
             }
-            
-            
+
+
 
 
 
@@ -929,7 +972,7 @@
 
             d3.select("#resetButton").on("click", function () {
                 chinaMapArea.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
-            
+
                 chinaMapArea.selectAll("path.topicPath")
                     .each(function () {
                         const originalColor = d3.select(this).attr("data-original-color");
@@ -937,10 +980,10 @@
                             .style("fill", originalColor)
                             .on("click", clicked); // Re-enable click on reset
                     });
-            
+
                 selectedProvince = null; // Clear selected province
             });
-            
+
         }
         requestData();
 
@@ -978,8 +1021,8 @@
             // In this case the "data" are pixels, and we get numbers to use in colorScale
             // Use this to make axis labels
             let barScale = d3.scaleLinear()
-                .domain([legendMinMax[0], legendMinMax[1]]) 
-                .range([10, legendBarWidth - 10]); 
+                .domain([legendMinMax[0], legendMinMax[1]])
+                .range([10, legendBarWidth - 10]);
             let barAxis = d3.axisBottom(barScale);
 
             // Place for bar slices to live
