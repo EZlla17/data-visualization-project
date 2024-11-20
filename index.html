@@ -405,6 +405,9 @@
                     .attr("class", "topicPath")
                     .attr("d", path)
                     .style("fill", d => {
+                        if (selectedYear > 2023) {
+                        return "#808080";
+                    }
                         const regionData = data.find(row => row.Region === regionList[d.index]);
                         const color = regionData ? colorScale(regionData[selectedYear]) : "#808080"; // Default gray for missing data
                         return color;
