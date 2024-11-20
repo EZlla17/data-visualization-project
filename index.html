@@ -475,13 +475,13 @@
 
                             if (regionData !== undefined) {
                                 if (regionData[selectedYear] != undefined) {
-                                    value=regionData[selectedYear];
+                                    value = regionData[selectedYear];
                                 } else {
                                     //defualt value when data not available
-                                    value="Data not yet availabe";
+                                    value = "Data not yet availabe";
                                 }
                             } else {
-                                value="Data not yet availabe";
+                                value = "Data not yet availabe";
                             }
 
                             d3.select(this).style("fill", "#9B2A4E");
@@ -569,6 +569,18 @@
                     .attr("class", "yearRangeButton yearButton")
                     .attr("id", `${"yearRangeButton" + d}`)
                     .on("click", function () {
+                        chinaMapArea.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+
+                        chinaMapArea.selectAll("path.topicPath")
+                            .each(function () {
+                                const originalColor = d3.select(this).attr("data-original-color");
+                                d3.select(this)
+                                    .style("fill", originalColor)
+                                    .on("click", clicked); // Re-enable click on reset
+                            });
+
+                        selectedProvince = null; // Clear selected province
+
                         if (lastClickedYearRangeButton != null) {
                             d3.select(lastClickedYearRangeButton).classed("clicked", false);
                         }
@@ -610,6 +622,19 @@
                         .attr("class", "yearButton")
                         .attr("id", `${"yearButton" + d}`)
                         .on("click", function () {
+
+                            chinaMapArea.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+
+                            chinaMapArea.selectAll("path.topicPath")
+                                .each(function () {
+                                    const originalColor = d3.select(this).attr("data-original-color");
+                                    d3.select(this)
+                                        .style("fill", originalColor)
+                                        .on("click", clicked); // Re-enable click on reset
+                                });
+
+                            selectedProvince = null; // Clear selected province
+                            
                             if (lastClickedYearButton != null) {
                                 d3.select(lastClickedYearButton).classed("clicked", false);
                             }
@@ -658,6 +683,19 @@
                     .attr("id", `${"topicButton" + d}`)
                     .text(d)
                     .on("click", function () {
+
+                        chinaMapArea.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+
+                        chinaMapArea.selectAll("path.topicPath")
+                            .each(function () {
+                                const originalColor = d3.select(this).attr("data-original-color");
+                                d3.select(this)
+                                    .style("fill", originalColor)
+                                    .on("click", clicked); // Re-enable click on reset
+                            });
+
+                        selectedProvince = null; // Clear selected province
+
                         if (lastClickedTopicButton != null) {
                             d3.select(lastClickedTopicButton).classed("clicked", false);
                         }
@@ -1099,7 +1137,7 @@
                         .style("fill", legendColorScale((dataStart + dataEnd) / 2.0));
                 }
             }
-            
+
             //Refer to the professor's notes
             else if (legendColorScale.hasOwnProperty('rangeRound')) {
 
