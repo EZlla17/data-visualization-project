@@ -484,7 +484,7 @@
                                 value="Data not yet availabe";
                             }
 
-                            d3.select(this).style("fill", "#2E4E7E");
+                            d3.select(this).style("fill", "#9B2A4E");
 
                             //get the position of mouse cursor
                             //reference: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/pageX
@@ -1091,7 +1091,6 @@
                 .attr("class", "legend colorbar")
                 .attr("transform", `translate(${offsets.width},${offsets.top})`)
 
-            // ****** SWITCHES FOR DIFFERENT SCALE TYPES ******
 
             // Check if we're using a binning scale - if so, we make blocks of color
             if (legendColorScale.hasOwnProperty('thresholds') || legendColorScale.hasOwnProperty('quantiles')) {
@@ -1120,19 +1119,9 @@
                         .style("fill", legendColorScale((dataStart + dataEnd) / 2.0));
                 }
             }
-            // Else if we have a continuous / roundable scale
-            //  In an ideal world you might construct a custom gradient mapped to the scale
-            //  For this one, we use a hack of making stepped rects
+            
+            //Refer to the professor's notes
             else if (legendColorScale.hasOwnProperty('rangeRound')) {
-                // NOTE: The barAxis may round min and max values to make them pretty
-                // ** This also means there is a risk of the legend going beyond scale bounds
-                // We need to use the barAxis min and max just to be sure the bar is complete
-                //    Using barAxis.scale().invert() goes from *axis* pixels to data values easily
-                // ** We also need to create patches for the scale if the labels exceed bounds
-                //     (floating point comparisons risky for small data ranges,but not a big deal
-                //      because patches will be indistinguishable from actual scale bottom)
-                // It's likely that scale clamping will actually do this for us elegantly
-                // ...but better to be safer and patch the regions anyways
 
                 for (let i = 0; i < legendBarWidth; i = i + stepSize) {
 
