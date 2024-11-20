@@ -356,9 +356,6 @@
                 }
             });
 
-            // console.log(population);
-            // console.log(grp);
-
             //add index to each feature
             region.features.forEach((feature, i) => {
                 feature.index = i;
@@ -463,7 +460,13 @@
                     })
                     //add mouseover effect
                     .on("mouseover", function (event, d) {
+                        //if hover is not enabled (set to false during zooming), return
                         if (!hoverEnabled) return;
+
+                        //compare current zoom index with the zoom index set when a specific
+                        //province being selected, if not equal (means users do zoom in/out after
+                        //selecting action, resume mouseover)
+                        //other mouse actions follow the same principles as this one
                         currentZoomIndex = d3.zoomTransform(chinaMapArea.node()).k;
 
                         if (currentZoomIndex != clickedZoomIndex) {
@@ -733,12 +736,16 @@
 
             chinaMapArea.call(zoom.transform, d3.zoomIdentity);
 
+
+            //function that help coordinate zoom action with color changes
             function mapZoomed({ transform }) {
                 chinaMapArea.attr("transform", transform.toString());
                 chinaMapArea.select('.outline')
                     .style('stroke-width', 1 / transform.k)
                     .attr("zoomedOut", "false");
 
+                //when there's previously selected region and users do zoom in/out after selecting
+                //a region, resume all colors for all regions to allow them to do further exploration
                 currentZoomIndex = d3.zoomTransform(chinaMapArea.node()).k;
 
                 if (clickedZoomIndex !== null && currentZoomIndex !== clickedZoomIndex) {
@@ -790,9 +797,12 @@
                 if (topic === "Local Government Revenue") return localGovernRevenue;
             }
 
-
+            //initiate the lastClickedRegion to store the last region that is selected
             let lastClickedRegion = null;
 
+            //when a region is clicked, zoom in to that region through adjusting to proper position
+            //in the map and gray out all of the other regions to emphasize on the selected region
+            //as well as reduce distraction
             function clicked(event, d) {
                 zoomedOut = false;
 
