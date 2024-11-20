@@ -265,7 +265,7 @@
         const histSvg = d3.select("svg#barchart");
         const histWidth = histSvg.attr("width");
         const histHeight = histSvg.attr("height");
-        const histMargin = { top: 10, right: 10, bottom: 50, left: 60 };
+        const histMargin = { top: 20, right: 10, bottom: 50, left: 60 };
         const histChartWidth = histWidth - histMargin.left - histMargin.right;
         const histChartHeight = histHeight - histMargin.top - histMargin.bottom;
 
@@ -940,6 +940,17 @@
                     "Consumption Expenditure": "Consumption Expenditure (Yuan)",
                     "Local Government Revenue": "Local Government Revenue (Yuan)"
                 };
+                // Update histogram title
+                histSvg.selectAll(".hist-title").remove();
+                histSvg.append("text")
+                    .attr("class", "hist-title")
+                    .attr("x", histChartWidth / 2 + histMargin.left)
+                    .attr("y", histMargin.top - 5)
+                    .style("text-anchor", "middle")
+                    .style("font-size", "16px")
+                    .style("font-weight", "bold")
+                    .text(`Histogram of ${topicLabels[selectedTopic]} for ${selectedProvince}`);
+
 
                 // Update x-axis label with selected topic
                 d3.select(".x-axis-label")
@@ -953,6 +964,15 @@
 
             //display the histogram
             function showHist(data) {
+                histSvg.selectAll(".hist-title").remove(); 
+                histSvg.append("text")
+                    .attr("class", "hist-title")
+                    .attr("x", histChartWidth / 2 + histMargin.left) 
+                    .attr("y", histMargin.top - 20) 
+                    .style("text-anchor", "middle")
+                    .style("font-size", "16px")
+                    .style("font-weight", "bold")
+                    .text(`Histogram of ${selectedTopic} for ${selectedProvince}`);
                 const gradient = histSvg.append("defs")
                     .append("linearGradient")
                     .attr("id", "gradient")
