@@ -8,7 +8,12 @@
 
 <style>
     body {
-        background-color: #F4F8F1;
+        background-color: #f6f6ea;
+        /* background-image: url('background.png'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat; */
         padding: 20px;
     }
 
@@ -210,7 +215,11 @@
     <h1 style="display: flex; align-items: center; justify-content: center; font-size: 50px; margin-bottom: 20px;">
         China’s Economic Pulse
         Over The Years</h1>
-
+    <p style="padding-left: 100px; padding-right:100px; font-size: 18px; color:#50150A;font-family: Georgia, 'Times New Roman', Times, serif;">This interactive visualization explores China’s economic trends across provinces over time. Users can analyze key
+        indicators such as GRP, Population, Disposable Income, Local Government Revenue, and Consumption Expenditure
+        using a time slider and color-coded map.
+        Designed for researchers and policymakers, this tool provides a clear view of regional economic growth and
+        disparities, offering insights into China’s evolving economy.</p>
     <!-- Create a svg for China map -->
     <div style="display: flex; flex-direction: row;">
         <div style="display: flex; flex-direction: column; align-items: center;">
@@ -245,8 +254,6 @@
                     <svg id="colorLegend" height="50" width="550" style=" margin-top:30px;"></svg>
                 </div>
             </div>
-
-            <svg id="barchart" height="500" width="800" style="margin-top:50px"></svg>
         </div>
     </div>
     <script>
@@ -259,18 +266,6 @@
 
         let chinaMapArea = chinaMap.append("g")
             .attr("transform", `translate(${margins.left},${margins.top})`);
-
-
-        const histSvg = d3.select("svg#barchart");
-        const histWidth = histSvg.attr("width");
-        const histHeight = histSvg.attr("height");
-        const histMargin = { top: 40, right: 10, bottom: 50, left: 100 };
-        const histChartWidth = histWidth - histMargin.left - histMargin.right;
-        const histChartHeight = histHeight - histMargin.top - histMargin.bottom;
-
-        let annotations = histSvg.append("g").attr("id", "annotations");
-        let histChartArea = histSvg.append("g").attr("id", "points")
-            .attr("transform", `translate(${histMargin.left},${histMargin.top})`)
 
 
         const requestData = async () => {
@@ -360,7 +355,7 @@
                 feature.index = i;
             });
 
-            //create projection for the map
+            //create projection for map
             var projection = d3.geoMercator().fitSize([chinaMapWidth, chinaMapHeight], region);
             var path = d3.geoPath().projection(projection);
             console.log(path)
@@ -910,163 +905,6 @@
                 updateLabels(selectedTopic, selectedProvince);
             }
 
-
-
-
-
-            // Append x-axis label
-            histChartArea.append("text")
-                .attr("class", "x-axis-label")
-                .attr("x", histChartWidth / 2)
-                .attr("y", histChartHeight + 40)
-                .style("text-anchor", "middle")
-                .style("font-size", "14px");
-
-            // Append y-axis label
-            histChartArea.append("text")
-                .attr("class", "y-axis-label")
-                .attr("transform", `rotate(-90)`)
-                .attr("x", -histChartHeight / 2)
-                .attr("y", -50)
-                .style("text-anchor", "middle")
-                .style("font-size", "14px");
-
-            function updateLabels(selectedTopic, selectedProvince) {
-                const topicLabels = {
-                    "GRP": "Gross Regional Product (GRP)",
-                    "Population": "Population (millions)",
-                    "Disposable Income": "Disposable Income (Yuan)",
-                    "Consumption Expenditure": "Consumption Expenditure (Yuan)",
-                    "Local Government Revenue": "Local Government Revenue (Yuan)"
-                };
-                // Update histogram title
-                histSvg.selectAll(".hist-title").remove();
-                histSvg.append("text")
-                    .attr("class", "hist-title")
-                    .attr("x", histChartWidth / 2 + histMargin.left)
-                    .attr("y", histMargin.top - 25)
-                    .style("text-anchor", "middle")
-                    .style("font-size", "16px")
-                    .text(`Histogram of ${topicLabels[selectedTopic]} for ${selectedProvince}`);
-
-
-                // Update x-axis label with selected topic
-                d3.select(".x-axis-label")
-                    .text(`Year`);
-
-                // Update y-axis label with selected topic
-                d3.select(".y-axis-label")
-                    .text(`${topicLabels[selectedTopic]} of ${selectedProvince}`)
-                    .attr("y", -70);
-
-            }
-
-            //display the histogram
-            function showHist(data) {
-                histSvg.selectAll(".hist-title").remove();
-                histSvg.append("text")
-                    .attr("class", "hist-title")
-                    .attr("x", histChartWidth / 2 + histMargin.left)
-                    .attr("y", histMargin.top - 20)
-                    .style("text-anchor", "middle")
-                    .style("font-size", "16px")
-                    .style("font-weight", "bold")
-                    .text(`Histogram of ${selectedTopic} for ${selectedProvince}`);
-                const gradient = histSvg.append("defs")
-                    .append("linearGradient")
-                    .attr("id", "gradient")
-                    .attr("x1", "0%")
-                    .attr("x2", "0%")
-                    .attr("y1", "0%")
-                    .attr("y2", "100%");
-
-                gradient.append("stop")
-                    .attr("offset", "0%")
-                    .attr("stop-color", "#E97A63") // Top color
-                    .attr("stop-opacity", 1);
-
-                gradient.append("stop")
-                    .attr("offset", "100%")
-                    .attr("stop-color", "#DC6142") // Bottom color
-                    .attr("stop-opacity", 1);
-                const yearData = Object.keys(data)
-                    .filter(key => !isNaN(key))
-                    .map(year => ({ year: +year, value: data[year] }));
-
-                const x = d3.scaleBand()
-                    .domain(yearData.map(d => d.year))
-                    .range([0, histChartWidth])
-                    .padding(0.1);
-
-                const y = d3.scaleLinear()
-                    .domain([0, d3.max(yearData, d => d.value)])
-                    .range([histChartHeight, 0]);
-
-                histChartArea.selectAll('rect')
-                    .data(yearData)
-                    .join('rect')
-                    .attr('x', d => x(d.year))
-                    .attr('y', d => y(d.value))
-                    .attr('width', x.bandwidth())
-                    .attr('height', d => histChartHeight - y(d.value))
-                    .attr('fill', 'url(#gradient)');
-
-                const valueScale = d3.scaleLinear()
-                    .domain([0, d3.max(yearData, d => d.value)])
-                    .range([histChartHeight, 0]);
-
-                annotations.selectAll(".x.axis").remove();
-                annotations.selectAll(".y.axis").remove();
-                annotations.selectAll(".y.gridlines").remove();
-                let leftAxis = d3.axisLeft(valueScale);
-                let leftGridlines = d3.axisLeft(valueScale)
-                    .tickSize(-histChartWidth - 10)
-                    .tickFormat("")
-                annotations.append("g")
-                    .attr("class", "y axis")
-                    .attr("transform", `translate(${histMargin.left - 10},${histMargin.top})`)
-                    .call(leftAxis)
-                annotations.append("g")
-                    .attr("class", "y gridlines")
-                    .attr("transform", `translate(${histMargin.left - 10},${histMargin.top})`)
-                    .call(leftGridlines)
-                    .style("stroke", "#cccccc") // Light gray
-                    .style("stroke-dasharray", "3,3"); // Dashed lines;
-
-
-                const xScale = d3.scaleBand()
-                    .domain(d3.range(2004, 2025)) // Years from 2004 to 2024
-                    .range([0, histChartWidth])
-                    .padding(0.05);
-                let bottomAxis = d3.axisBottom(xScale)
-                const xAxis = d3.axisBottom(x)
-                    .tickValues(yearData.map(d => d.year))
-                    .tickFormat(d => d);
-
-                annotations.append("g")
-                    .attr("class", "x axis")
-                    .attr("transform", `translate(${histMargin.left}, ${histHeight - histMargin.bottom})`)
-                    .call(xAxis)
-                    .selectAll("text")
-                    .attr("transform", "rotate(-30)");
-                // .style("text-anchor", "middle");
-
-                d3.select(".x.axis").selectAll("line, path")
-                    .style("stroke", "#333333");
-
-                d3.select(".y.axis").selectAll("line, path")
-                    .style("stroke", "#333333");
-
-                d3.select(".x.axis").selectAll("text")
-                    .style("font-family", "Roboto")
-                    .style("font-size", "12px")
-                    .style("fill", "#333333");
-
-                d3.select(".y.axis").selectAll("text")
-                    .style("font-family", "Roboto")
-                    .style("font-size", "12px")
-                    .style("fill", "#333333");
-            }
 
             d3.select("#resetButton").on("click", function () {
                 chinaMapArea.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
