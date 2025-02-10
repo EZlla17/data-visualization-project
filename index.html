@@ -12,6 +12,7 @@
         padding: 20px;
     }
 
+
     h1 {
         color: #8A1D12;
 
@@ -209,8 +210,6 @@
     <h1 style="display: flex; align-items: center; justify-content: center; font-size: 50px; margin-bottom: 20px;">
         China’s Economic Pulse
         Over The Years</h1>
-    <p style="color:#50150A; display: flex; align-items: center; justify-content: center;"><strong>Group
-            member:</strong> Xinyi Zhou(xz255) | Minghan Gao(mg2328) | Warren Hua(wsh48)</p>
 
     <!-- Create a svg for China map -->
     <div style="display: flex; flex-direction: row;">
@@ -265,7 +264,7 @@
         const histSvg = d3.select("svg#barchart");
         const histWidth = histSvg.attr("width");
         const histHeight = histSvg.attr("height");
-        const histMargin = { top: 20, right: 10, bottom: 50, left: 60 };
+        const histMargin = { top: 40, right: 10, bottom: 50, left: 100 };
         const histChartWidth = histWidth - histMargin.left - histMargin.right;
         const histChartHeight = histHeight - histMargin.top - histMargin.bottom;
 
@@ -634,7 +633,7 @@
                                 });
 
                             selectedProvince = null; // Clear selected province
-                            
+
                             if (lastClickedYearButton != null) {
                                 d3.select(lastClickedYearButton).classed("clicked", false);
                             }
@@ -945,10 +944,9 @@
                 histSvg.append("text")
                     .attr("class", "hist-title")
                     .attr("x", histChartWidth / 2 + histMargin.left)
-                    .attr("y", histMargin.top - 5)
+                    .attr("y", histMargin.top - 25)
                     .style("text-anchor", "middle")
                     .style("font-size", "16px")
-                    .style("font-weight", "bold")
                     .text(`Histogram of ${topicLabels[selectedTopic]} for ${selectedProvince}`);
 
 
@@ -958,17 +956,18 @@
 
                 // Update y-axis label with selected topic
                 d3.select(".y-axis-label")
-                    .text(`${topicLabels[selectedTopic]} of ${selectedProvince}`);
+                    .text(`${topicLabels[selectedTopic]} of ${selectedProvince}`)
+                    .attr("y", -70);
 
             }
 
             //display the histogram
             function showHist(data) {
-                histSvg.selectAll(".hist-title").remove(); 
+                histSvg.selectAll(".hist-title").remove();
                 histSvg.append("text")
                     .attr("class", "hist-title")
-                    .attr("x", histChartWidth / 2 + histMargin.left) 
-                    .attr("y", histMargin.top - 20) 
+                    .attr("x", histChartWidth / 2 + histMargin.left)
+                    .attr("y", histMargin.top - 20)
                     .style("text-anchor", "middle")
                     .style("font-size", "16px")
                     .style("font-weight", "bold")
